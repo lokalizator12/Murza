@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MurzaApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MurzaApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MurzaApplication.class, args);
+    }
 
 }
