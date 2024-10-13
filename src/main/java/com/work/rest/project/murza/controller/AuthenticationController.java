@@ -5,6 +5,8 @@ import com.work.rest.project.murza.dto.LoginUserDto;
 import com.work.rest.project.murza.dto.RegisterUserDto;
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.service.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,15 +35,24 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    private ResponseEntity<?> authenticate(@RequestBody LoginUserDto loginUserDto) {
+    private ResponseEntity<?> authenticate(@RequestBody LoginUserDto loginUserDto, HttpServletResponse response) {
         log.info("Login attempt for email: {}", loginUserDto.getEmail());
         try {
-            AuthenticateResponseDto responseDto = authenticationService.authenticate(loginUserDto);
+            AuthenticateResponseDto responseDto = authenticationService.authenticate(loginUserDto, response);
             log.info("Login successful for email: {}", loginUserDto.getEmail());
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
             log.error("Login failed for email: {}: {}", loginUserDto.getEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed");
         }
+    }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        log.info("Start logout service");
+        authenticationService.logoutJwt(request, response);
+        log.info("Logout successful ");
+        return ResponseEntity.ok("Token deleted. User is successfully logout.");
     }
 }

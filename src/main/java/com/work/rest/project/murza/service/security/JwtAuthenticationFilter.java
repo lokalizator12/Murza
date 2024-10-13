@@ -1,6 +1,7 @@
 package com.work.rest.project.murza.service.security;
 
 
+import com.work.rest.project.murza.service.BlacklistJwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final BlacklistJwtService blacklistJwtService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -39,6 +41,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            if (blacklistJwtService.isTokenBlacklisted(authHeader.substring(7))) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+        }
         try {
             final String jwt = authHeader.substring(7);
             final String userEmail = jwtService.extractUsername(jwt);

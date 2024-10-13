@@ -8,7 +8,11 @@ import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.repository.RoleRepository;
 import com.work.rest.project.murza.repository.UserRepository;
 import com.work.rest.project.murza.service.AuthenticationService;
+import com.work.rest.project.murza.service.BlacklistJwtService;
 import com.work.rest.project.murza.service.security.JwtService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final RoleRepository roleRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-
+    private final BlacklistJwtService blacklistService;
 
     @Override
     public User signUp(@Valid RegisterUserDto userDto) {
@@ -73,7 +77,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthenticateResponseDto authenticate(@Valid LoginUserDto input) {
+    public void logoutJwt(HttpServletRequest request, HttpServletResponse response) {
+        String jwtToken = request.getHeader("Authorization").substring(7);
+        blacklistService.addTokenToBlacklist(jwtToken);
+        Cookie jwtCookie = new Cookie("jwt", null);
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setMaxAge(0);
+        jwtCookie.setPath("/");
+        response.addCookie(jwtCookie);
+    }
+
+    @Override
+    public AuthenticateResponseDto authenticate(@Valid LoginUserDto input,  HttpServletResponse response) {
         log.info("Start authentication");
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -85,8 +100,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User newUser = userRepository.findByEmail(input.getEmail()).get();
         String jwtToken = jwtService.generateToken(newUser);
         log.info("Token generated");
-        return AuthenticateResponseDto.builder()
+
+        AuthenticateResponseDto authenticateResponseDto = AuthenticateResponseDto.builder()
                 .token(jwtToken)
                 .expiresIn(jwtService.getJwtExpirationInMs()).build();
+        Cookie jwtCookie = new Cookie("jwt", authenticateResponseDto.getToken());
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setSecure(true);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(authenticateResponseDto.getExpiresIn() / 1000);
+        response.addCookie(jwtCookie);
+        return authenticateResponseDto;
     }
 }
