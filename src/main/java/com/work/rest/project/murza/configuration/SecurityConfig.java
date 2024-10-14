@@ -1,5 +1,6 @@
-package com.work.rest.project.murza.service.security;
+package com.work.rest.project.murza.configuration;
 
+import com.work.rest.project.murza.service.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
