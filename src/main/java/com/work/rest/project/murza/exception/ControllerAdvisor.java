@@ -51,9 +51,25 @@ public class ControllerAdvisor {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException ex) {
+        return new ResponseEntity<>(STR."User with cred. : \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
+    }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(CityNotFoundException.class)
+    public ResponseEntity<String> handleCityNotFoundException(CityNotFoundException ex) {
+        return new ResponseEntity<>(STR."City with id. : \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ParcelNotFoundException.class)
+    public ResponseEntity<String> handleParcelNotFoundException(ParcelNotFoundException ex) {
+        return new ResponseEntity<>(STR."Parcel with id: \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)

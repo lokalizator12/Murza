@@ -12,6 +12,8 @@ public interface UserService {
 
     Optional<User> getUserByEmail(String email);
 
+    public User getCurrentUser();
+
     Optional<User> updateUserAdmin();
 
     Optional<User> updateProfileUser();
