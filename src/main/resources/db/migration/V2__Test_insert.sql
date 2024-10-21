@@ -1,5 +1,34 @@
 
-INSERT INTO country (name) VALUES
+
+CREATE TABLE IF NOT EXISTS shipping_methods (
+                                                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                                method_name VARCHAR(255) NOT NULL
+    );
+
+CREATE TABLE IF NOT EXISTS items (
+                       id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                       item_name VARCHAR(255) NOT NULL UNIQUE
+);
+
+INSERT INTO categories (category_name) VALUES
+                                           ('Electronics'),
+                                           ('Furniture'),
+                                           ('Clothing'),
+                                           ('Food'),
+                                           ('Personal Items'),
+                                           ('Sports Equipment');
+
+INSERT IGNORE INTO shipping_methods (method_name) VALUES
+                                               ('Car'),
+                                               ('Bus'),
+                                               ('Walking'),
+                                               ('Motorcycle'),
+                                               ('Bicycle'),
+                                               ('Train'),
+                                               ('Airplane'),
+                                               ('Boat');
+
+INSERT IGNORE INTO country (name) VALUES
                                        ('Germany'),
                                        ('France'),
                                        ('Russia'),

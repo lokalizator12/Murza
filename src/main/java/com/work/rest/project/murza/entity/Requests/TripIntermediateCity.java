@@ -1,5 +1,6 @@
 package com.work.rest.project.murza.entity.Requests;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class TripIntermediateCity {
 
     @ManyToOne
     @JoinColumn(name = "trip_request_id")
+    @JsonIgnore
     private TripRequest tripRequest;
 
     @ManyToOne

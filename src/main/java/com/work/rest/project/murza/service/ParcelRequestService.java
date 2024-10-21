@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 public interface ParcelRequestService {
     public ParcelRequest createParcelRequest(CreateParcelRequestDTO parcelRequest, List<MultipartFile> files) throws IOException;
@@ -14,9 +15,9 @@ public interface ParcelRequestService {
     public List<ParcelRequest> getAllParcelRequests();
 
 
-    public ParcelRequest getParcelRequestById(Long id);
+    public ParcelRequest getParcelRequestById(UUID id);
 
 
-    public void deleteParcelRequest(Long id);
+    public void deleteParcelRequest(UUID id);
 
 }

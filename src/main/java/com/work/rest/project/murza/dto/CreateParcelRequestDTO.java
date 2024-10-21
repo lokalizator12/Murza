@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class CreateParcelRequestDTO {
@@ -27,6 +28,7 @@ public class CreateParcelRequestDTO {
     public ParcelRequest toEntity(City pickupLocation, City deliveryLocation, User sender) {
         ParcelRequest parcelRequest = new ParcelRequest();
         parcelRequest.setDescription(this.description);
+        parcelRequest.setIdParcel(UUID.randomUUID());
         parcelRequest.setDeclaration(this.declaration);
         parcelRequest.setWeight(this.weight);
         parcelRequest.setSize(this.size);

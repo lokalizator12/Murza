@@ -1,6 +1,7 @@
 package com.work.rest.project.murza.service.impl.Requests;
 
 import com.work.rest.project.murza.entity.Requests.City;
+import com.work.rest.project.murza.entity.Requests.TripIntermediateCity;
 import com.work.rest.project.murza.exception.CityNotFoundException;
 import com.work.rest.project.murza.repository.CityRepository;
 import com.work.rest.project.murza.service.CityService;
@@ -19,6 +20,10 @@ public class CityServiceImpl implements CityService {
     public City getCityById(Long cityId) {
         Optional<City> city = cityRepository.findById(cityId);
         return city.orElseThrow(() -> new CityNotFoundException(cityId.toString()));
+    }
+    @Override
+    public List<City> getCitiesByIds(List<Long> cities) {
+        return cityRepository.findAllById(cities);
     }
 
     @Override

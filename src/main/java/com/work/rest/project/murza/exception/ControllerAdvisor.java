@@ -45,6 +45,12 @@ public class ControllerAdvisor {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ShippingMethodNotFoundException.class)
+    public ResponseEntity<String> handleShippingMethodException(ShippingMethodNotFoundException ex) {
+        return new ResponseEntity<>(STR."Shipping method with id : \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
+    }
+
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleValidationExceptions(AccessDeniedException ex) {
@@ -56,6 +62,12 @@ public class ControllerAdvisor {
     public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException ex) {
         return new ResponseEntity<>(STR."User with cred. : \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
     }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(TripRequestNotFoundException.class)
+    public ResponseEntity<String> handleTripRequestNotFoundException(TripRequestNotFoundException ex) {
+        return new ResponseEntity<>(STR."Trip request with id: \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
+    }
+
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(CityNotFoundException.class)
     public ResponseEntity<String> handleCityNotFoundException(CityNotFoundException ex) {

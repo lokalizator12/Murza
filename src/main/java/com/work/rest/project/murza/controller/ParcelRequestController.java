@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -41,13 +42,13 @@ public class ParcelRequestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ParcelRequest> getParcelRequestById(@PathVariable Long id) {
+    public ResponseEntity<ParcelRequest> getParcelRequestById(@PathVariable UUID id) {
         log.info("Get parcel with id: {}", id);
         return ResponseEntity.ok(parcelRequestService.getParcelRequestById(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteParcelRequest(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteParcelRequest(@PathVariable UUID id) {
         log.info("Delete parcel with id: {}", id);
         parcelRequestService.deleteParcelRequest(id);
         log.info("Deleted");

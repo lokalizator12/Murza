@@ -1,5 +1,6 @@
 package com.work.rest.project.murza.entity.Requests;
 
+import com.work.rest.project.murza.entity.ItemsDelivery;
 import com.work.rest.project.murza.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -49,9 +50,21 @@ public class TripRequest {
     @Temporal(TemporalType.TIMESTAMP)
     private Date destinationDate;
 
-    private String acceptedItems;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "accepted_items",
+            joinColumns = @JoinColumn(name = "trip_request_id"),
+            inverseJoinColumns = @JoinColumn(name = "item_delivery_id")
+    )
+    private List<ItemsDelivery> acceptedItems;
 
-    private String declinedItems;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "declined_items",
+            joinColumns = @JoinColumn(name = "trip_request_id"),
+            inverseJoinColumns = @JoinColumn(name = "item_delivery_id")
+    )
+    private List<ItemsDelivery> declinedItems;
 
     @NotBlank(message = "Description is mandatory")
     private String description;
@@ -60,7 +73,7 @@ public class TripRequest {
     @JoinColumn(name = "shipping_method_id")
     private ShippingMethod shippingMethod;
 
-    @OneToMany(mappedBy = "tripRequest", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "tripRequest", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TripIntermediateCity> intermediateCities;
 
     private boolean isRealized;

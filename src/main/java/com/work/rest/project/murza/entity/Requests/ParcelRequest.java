@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -17,8 +18,8 @@ import java.util.List;
 public class ParcelRequest {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idParcel;
+    @GeneratedValue
+    private UUID idParcel;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
