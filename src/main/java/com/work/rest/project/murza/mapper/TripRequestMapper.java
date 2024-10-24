@@ -14,7 +14,7 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring", uses = {CityService.class, ShippingMethodRepository.class})
 public interface TripRequestMapper {
 
-    @Mapping(target = "departureLocation", source = "departureLocationId")
+   /* @Mapping(target = "departureLocation", source = "departureLocationId")
     @Mapping(target = "destinationLocation", source = "destinationLocationId")
     @Mapping(target = "shippingMethod", source = "shippingMethodId")
     @Mapping(target = "acceptedItems", source = "acceptedItemsId")
@@ -28,5 +28,5 @@ public interface TripRequestMapper {
     default ShippingMethod mapShippingMethod(Long id) {
         return shippingMethodRepository.findById(id)
                 .orElseThrow(() -> new ShippingMethodNotFoundException(id.toString()));
-    }
+    }*/
 }

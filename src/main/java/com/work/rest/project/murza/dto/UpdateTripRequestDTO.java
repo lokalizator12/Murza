@@ -21,10 +21,4 @@ public class UpdateTripRequestDTO {
     private Long shippingMethodId;
     private List<Long> intermediateCities;
 
-    public TripRequest toEntity(UpdateTripRequestDTO dto){
-        TripRequest tripRequest =  new TripRequest();
-
-    }
-
-
 }

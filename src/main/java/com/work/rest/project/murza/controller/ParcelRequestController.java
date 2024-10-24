@@ -18,6 +18,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin
 @RequestMapping("/api/parcel-requests")
 public class ParcelRequestController {
 
