@@ -1,7 +1,6 @@
 package com.work.rest.project.murza.dto;
 
 
-import com.work.rest.project.murza.entity.Requests.City;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.User;
 import lombok.Data;
@@ -12,7 +11,6 @@ import java.util.UUID;
 
 @Data
 public class CreateParcelRequestDTO {
-
     private String description;
     private boolean declaration;
     private double weight;
@@ -20,12 +18,19 @@ public class CreateParcelRequestDTO {
     private double price;
     private Date pickupDate;
     private Date deliveryDate;
-    private Long pickupLocationId;
-    private Long deliveryLocationId;
-    private List<String> photos;
+    private double pickupLatitude;
+    private double pickupLongitude;
+    private String pickupAddress;
+    private double deliveryLatitude;
+    private double deliveryLongitude;
+    private String deliveryAddress;
+    private double volume;
+    private double height;
+    private double width;
+    private double length;
+    private Double suggestedPrice;
 
-
-    public ParcelRequest toEntity(City pickupLocation, City deliveryLocation, User sender) {
+    public ParcelRequest toEntity(User sender) {
         ParcelRequest parcelRequest = new ParcelRequest();
         parcelRequest.setDescription(this.description);
         parcelRequest.setIdParcel(UUID.randomUUID());
@@ -35,9 +40,18 @@ public class CreateParcelRequestDTO {
         parcelRequest.setPrice(this.price);
         parcelRequest.setPickupDate(this.pickupDate);
         parcelRequest.setDeliveryDate(this.deliveryDate);
-        parcelRequest.setPickupLocation(pickupLocation);
-        parcelRequest.setDeliveryLocation(deliveryLocation);
         parcelRequest.setSender(sender);
+        parcelRequest.setPickupLatitude(this.pickupLatitude);
+        parcelRequest.setVolume(this.volume);
+        parcelRequest.setHeight(this.height);
+        parcelRequest.setWidth(this.width);
+        parcelRequest.setLength(this.length);
+        parcelRequest.setSuggestedPrice(this.getSuggestedPrice());
+        parcelRequest.setPickupLongitude(this.pickupLongitude);
+        parcelRequest.setPickupAddress(this.pickupAddress);
+        parcelRequest.setDeliveryLatitude(this.deliveryLatitude);
+        parcelRequest.setDeliveryLongitude(this.deliveryLongitude);
+        parcelRequest.setDeliveryAddress(this.deliveryAddress);
         return parcelRequest;
     }
 }

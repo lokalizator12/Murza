@@ -53,18 +53,23 @@ public class ParcelRequest {
     @Temporal(TemporalType.TIMESTAMP)
     private Date deliveryDate;
 
-    @ManyToOne
-    @NotNull(message = "Pickup location is mandatory")
-    @JoinColumn(name = "pickup_location_id")
-    private City pickupLocation;
+    @NotNull(message = "Pickup latitude is mandatory")
+    private double pickupLatitude;
 
-    @ManyToOne
-    @JoinColumn(name = "delivery_location_id")
-    @NotNull(message = "Delivery location is mandatory")
-    private City deliveryLocation;
+    @NotNull(message = "Pickup longitude is mandatory")
+    private double pickupLongitude;
 
-    @OneToMany(mappedBy = "parcelRequest", cascade = CascadeType.ALL)
-    private List<ParcelIntermediateCity> intermediateCities;
+    @NotBlank(message = "Pickup address is mandatory")
+    private String pickupAddress;
+
+    @NotNull(message = "Delivery latitude is mandatory")
+    private double deliveryLatitude;
+
+    @NotNull(message = "Delivery longitude is mandatory")
+    private double deliveryLongitude;
+
+    @NotBlank(message = "Delivery address is mandatory")
+    private String deliveryAddress;
 
     private boolean isRealized;
 
@@ -74,4 +79,19 @@ public class ParcelRequest {
 
     @Column(nullable = true)
     private Date realizedAt;
+
+    @Positive(message = "Volume must be positive")
+    private double volume;
+
+    @Positive(message = "Height must be positive")
+    private double height;
+
+    @Positive(message = "Width must be positive")
+    private double width;
+
+    @Positive(message = "Length must be positive")
+    private double length;
+
+
+    private Double suggestedPrice;
 }

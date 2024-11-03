@@ -1,6 +1,6 @@
 package com.work.rest.project.murza.dto;
 
-import com.work.rest.project.murza.entity.Requests.City;
+import com.work.rest.project.murza.entity.Requests.IntermediateLocation;
 import com.work.rest.project.murza.entity.Requests.ShippingMethod;
 import com.work.rest.project.murza.entity.Requests.TripRequest;
 import com.work.rest.project.murza.entity.User;
@@ -11,8 +11,12 @@ import java.util.List;
 
 @Data
 public class CreateTripRequestDTO {
-    private Long departureLocationId;
-    private Long destinationLocationId;
+    private double departureLatitude;
+    private double departureLongitude;
+    private String departureAddress;
+    private double destinationLatitude;
+    private double destinationLongitude;
+    private String destinationAddress;
     private double maxWeight;
     private double maxVolume;
     private String departureDate;
@@ -21,18 +25,28 @@ public class CreateTripRequestDTO {
     private List<Long> declinedItemsId;
     private String description;
     private Long shippingMethodId;
-    private List<Long> intermediateCities;
+    private List<IntermediateLocation> intermediateLocations;
+    private double maxHeight;
+    private double maxWidth;
+    private double maxLength;
 
-    public TripRequest toEntity(City pickupLocation, City deliveryLocation, ShippingMethod shippingMethod, User user) {
+    public TripRequest toEntity(ShippingMethod shippingMethod, User user) {
         TripRequest tripRequest = new TripRequest();
         tripRequest.setDriver(user);
-        tripRequest.setDepartureLocation(pickupLocation);
-        tripRequest.setDestinationLocation(deliveryLocation);
-        tripRequest.setMaxWeight(this.getMaxWeight());
-        tripRequest.setMaxVolume(this.getMaxVolume());
-        tripRequest.setDepartureDate(Timestamp.valueOf(this.getDepartureDate()));
-        tripRequest.setDestinationDate(Timestamp.valueOf(this.getDestinationDate()));
-        tripRequest.setDescription(this.getDescription());
+        tripRequest.setDepartureLatitude(this.departureLatitude);
+        tripRequest.setDepartureLongitude(this.departureLongitude);
+        tripRequest.setDepartureAddress(this.departureAddress);
+        tripRequest.setDestinationLatitude(this.destinationLatitude);
+        tripRequest.setDestinationLongitude(this.destinationLongitude);
+        tripRequest.setDestinationAddress(this.destinationAddress);
+        tripRequest.setMaxWeight(this.maxWeight);
+        tripRequest.setMaxVolume(this.maxVolume);
+        tripRequest.setMaxHeight(this.maxHeight);
+        tripRequest.setMaxWidth(this.maxWidth);
+        tripRequest.setMaxLength(this.maxLength);
+        tripRequest.setDepartureDate(Timestamp.valueOf(this.departureDate));
+        tripRequest.setDestinationDate(Timestamp.valueOf(this.destinationDate));
+        tripRequest.setDescription(this.description);
         tripRequest.setShippingMethod(shippingMethod);
         tripRequest.setRealized(false);
         return tripRequest;

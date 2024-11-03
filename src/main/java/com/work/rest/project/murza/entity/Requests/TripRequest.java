@@ -1,5 +1,6 @@
 package com.work.rest.project.murza.entity.Requests;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.work.rest.project.murza.entity.ItemsDelivery;
 import com.work.rest.project.murza.entity.User;
 import jakarta.persistence.*;
@@ -26,15 +27,24 @@ public class TripRequest {
     @NotNull(message = "Driver cannot be null")
     private User driver;
 
-    @ManyToOne
-    @JoinColumn(name = "departure_location_id")
-    @NotNull(message = "Departure location is mandatory")
-    private City departureLocation;
+    // Местоположение отправки
+    @NotNull(message = "Departure latitude is mandatory")
+    private double departureLatitude;
 
-    @ManyToOne
-    @JoinColumn(name = "destination_location_id")
-    @NotNull(message = "Destination location is mandatory")
-    private City destinationLocation;
+    @NotNull(message = "Departure longitude is mandatory")
+    private double departureLongitude;
+
+    @NotBlank(message = "Departure address is mandatory")
+    private String departureAddress;
+
+    @NotNull(message = "Destination latitude is mandatory")
+    private double destinationLatitude;
+
+    @NotNull(message = "Destination longitude is mandatory")
+    private double destinationLongitude;
+
+    @NotBlank(message = "Destination address is mandatory")
+    private String destinationAddress;
 
     @Positive(message = "Max weight must be positive")
     private double maxWeight;
@@ -42,12 +52,21 @@ public class TripRequest {
     @Positive(message = "Max volume must be positive")
     private double maxVolume;
 
+    @Positive(message = "Max height must be positive")
+    private double maxHeight;
+
+    @Positive(message = "Max width must be positive")
+    private double maxWidth;
+
+    @Positive(message = "Max length must be positive")
+    private double maxLength;
+
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull(message = "Departure date is mandatory")
     private Date departureDate;
 
-    @NotNull(message = "Destination date is mandatory")
     @Temporal(TemporalType.TIMESTAMP)
+    @NotNull(message = "Destination date is mandatory")
     private Date destinationDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -74,7 +93,8 @@ public class TripRequest {
     private ShippingMethod shippingMethod;
 
     @OneToMany(mappedBy = "tripRequest", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TripIntermediateCity> intermediateCities;
+    @JsonManagedReference
+    private List<IntermediateLocation> intermediateLocations;
 
     private boolean isRealized;
 

@@ -25,16 +25,14 @@ import java.util.UUID;
 public class ParcelRequestServiceImpl implements ParcelRequestService {
     private final ParcelRequestRepository parcelRequestRepository;
     private final FileService fileService;
-    private final CityService cityService;
     private final UserService userService;
 
     @Override
     public ParcelRequest createParcelRequest(CreateParcelRequestDTO parcelRequestDTO, List<MultipartFile> files) throws IOException {
         log.info("Start service saving parcel request");
-        City pickupLocation = cityService.getCityById(parcelRequestDTO.getPickupLocationId());
-        City deliveryLocation = cityService.getCityById(parcelRequestDTO.getDeliveryLocationId());
+
         User sender = userService.getCurrentUser();
-        ParcelRequest parcelRequest = parcelRequestDTO.toEntity(pickupLocation, deliveryLocation, sender);
+        ParcelRequest parcelRequest = parcelRequestDTO.toEntity(sender);
 
         List<String> filePaths = fileService.saveParcelPictures(files, parcelRequest.getIdParcel().toString());
         parcelRequest.setPhotos(filePaths);
@@ -57,5 +55,4 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
         ParcelRequest parcelRequest = getParcelRequestById(id);
         parcelRequestRepository.delete(parcelRequest);
     }
-
 }

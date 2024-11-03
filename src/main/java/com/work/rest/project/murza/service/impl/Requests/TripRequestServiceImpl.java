@@ -3,10 +3,8 @@ package com.work.rest.project.murza.service.impl.Requests;
 import com.work.rest.project.murza.dto.CreateTripRequestDTO;
 import com.work.rest.project.murza.dto.UpdateTripRequestDTO;
 import com.work.rest.project.murza.entity.ItemsDelivery;
-import com.work.rest.project.murza.entity.Requests.City;
-import com.work.rest.project.murza.entity.Requests.ShippingMethod;
-import com.work.rest.project.murza.entity.Requests.TripIntermediateCity;
-import com.work.rest.project.murza.entity.Requests.TripRequest;
+import com.work.rest.project.murza.entity.Requests.*;
+import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.exception.ShippingMethodNotFoundException;
 import com.work.rest.project.murza.exception.TripRequestNotFoundException;
 import com.work.rest.project.murza.repository.ItemsDeliveryRepository;
@@ -28,31 +26,25 @@ public class TripRequestServiceImpl implements TripRequestService {
     private final ShippingMethodRepository shippingMethodRepository;
     private final TripRequestRepository tripRequestRepository;
     private final ItemsDeliveryRepository itemsDeliveryRepository;
-    private final CityService cityService;
     private final UserService userService;
 
     @Override
     public TripRequest createTripRequest(CreateTripRequestDTO tripRequestDTO) {
-
         log.info("Start service saving trip request");
-        City pickupLocation = cityService.getCityById(tripRequestDTO.getDepartureLocationId());
-        City deliveryLocation = cityService.getCityById(tripRequestDTO.getDestinationLocationId());
 
+        User driver = userService.getCurrentUser();
         ShippingMethod shippingMethod = shippingMethodRepository.findById(tripRequestDTO.getShippingMethodId())
                 .orElseThrow(() -> new ShippingMethodNotFoundException(tripRequestDTO.getShippingMethodId().toString()));
 
-        List<City> cities = cityService.getCitiesByIds(tripRequestDTO.getIntermediateCities());
+        TripRequest tripRequest = tripRequestDTO.toEntity(shippingMethod, driver);
 
-        TripRequest tripRequest = tripRequestDTO.toEntity(pickupLocation, deliveryLocation, shippingMethod, userService.getCurrentUser());
-        List<TripIntermediateCity> tripIntermediateCities = cities.stream()
-                .map(city -> {
-                    TripIntermediateCity tripIntermediateCity = new TripIntermediateCity();
-                    tripIntermediateCity.setCity(city);
-                    tripIntermediateCity.setTripRequest(tripRequest);
-                    return tripIntermediateCity;
-                })
-                .toList();
-        tripRequest.setIntermediateCities(tripIntermediateCities);
+
+        List<IntermediateLocation> intermediateLocations = tripRequestDTO.getIntermediateLocations();
+        if (intermediateLocations != null) {
+            intermediateLocations.forEach(location -> location.setTripRequest(tripRequest));
+        }
+        tripRequest.setIntermediateLocations(intermediateLocations);
+
         List<ItemsDelivery> acceptedItems = itemsDeliveryRepository.findAllById(tripRequestDTO.getAcceptedItemsId());
         log.info("Accepted Items: {}", acceptedItems);
 
