@@ -6,7 +6,7 @@ import com.work.rest.project.murza.entity.Requests.TripRequest;
 import com.work.rest.project.murza.entity.User;
 import lombok.Data;
 
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -19,8 +19,8 @@ public class CreateTripRequestDTO {
     private String destinationAddress;
     private double maxWeight;
     private double maxVolume;
-    private String departureDate;
-    private String destinationDate;
+    private Date departureDate;
+    private Date destinationDate;
     private List<Long> acceptedItemsId;
     private List<Long> declinedItemsId;
     private String description;
@@ -44,8 +44,8 @@ public class CreateTripRequestDTO {
         tripRequest.setMaxHeight(this.maxHeight);
         tripRequest.setMaxWidth(this.maxWidth);
         tripRequest.setMaxLength(this.maxLength);
-        tripRequest.setDepartureDate(Timestamp.valueOf(this.departureDate));
-        tripRequest.setDestinationDate(Timestamp.valueOf(this.destinationDate));
+        tripRequest.setDepartureDate(this.departureDate);
+        tripRequest.setDestinationDate(this.destinationDate);
         tripRequest.setDescription(this.description);
         tripRequest.setShippingMethod(shippingMethod);
         tripRequest.setRealized(false);
