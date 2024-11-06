@@ -1,6 +1,7 @@
 package com.work.rest.project.murza.service;
 
 import com.work.rest.project.murza.dto.CreateParcelRequestDTO;
+import com.work.rest.project.murza.dto.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +15,8 @@ public interface ParcelRequestService {
 
     public List<ParcelRequest> getAllParcelRequests();
 
+
+    public List<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary();
 
     public ParcelRequest getParcelRequestById(UUID id);
 

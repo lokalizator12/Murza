@@ -1,12 +1,12 @@
 package com.work.rest.project.murza.service.impl.Requests;
 
 import com.work.rest.project.murza.dto.CreateParcelRequestDTO;
-import com.work.rest.project.murza.entity.Requests.City;
+import com.work.rest.project.murza.dto.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.exception.ParcelNotFoundException;
+import com.work.rest.project.murza.mapper.ParcelRequestMiniSummaryMapper;
 import com.work.rest.project.murza.repository.ParcelRequestRepository;
-import com.work.rest.project.murza.service.CityService;
 import com.work.rest.project.murza.service.ParcelRequestService;
 import com.work.rest.project.murza.service.UserService;
 import com.work.rest.project.murza.service.Utils.FileService;
@@ -26,6 +26,15 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
     private final ParcelRequestRepository parcelRequestRepository;
     private final FileService fileService;
     private final UserService userService;
+
+    @Override
+    public List<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary() {
+
+        return parcelRequestRepository.findAll()
+                .stream()
+                .map(ParcelRequestMiniSummaryMapper.INSTANCE::toDto)
+                .toList();
+    }
 
     @Override
     public ParcelRequest createParcelRequest(CreateParcelRequestDTO parcelRequestDTO, List<MultipartFile> files) throws IOException {

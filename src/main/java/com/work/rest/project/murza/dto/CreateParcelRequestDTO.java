@@ -12,6 +12,7 @@ import java.util.UUID;
 @Data
 public class CreateParcelRequestDTO {
     private String description;
+    private String title;
     private boolean declaration;
     private double weight;
     private String size;
@@ -33,6 +34,7 @@ public class CreateParcelRequestDTO {
     public ParcelRequest toEntity(User sender) {
         ParcelRequest parcelRequest = new ParcelRequest();
         parcelRequest.setDescription(this.description);
+        parcelRequest.setTitle(this.title);
         parcelRequest.setIdParcel(UUID.randomUUID());
         parcelRequest.setDeclaration(this.declaration);
         parcelRequest.setWeight(this.weight);

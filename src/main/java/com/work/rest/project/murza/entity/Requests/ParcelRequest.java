@@ -42,6 +42,9 @@ public class ParcelRequest {
     @NotBlank(message = "Size is mandatory")
     private String size;
 
+    @NotBlank(message = "Title is mandatory")
+    private String title;
+
     @Positive(message = "Price must be positive")
     private double price;
 
