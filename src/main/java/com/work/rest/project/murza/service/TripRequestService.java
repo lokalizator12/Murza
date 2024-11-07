@@ -1,6 +1,7 @@
 package com.work.rest.project.murza.service;
 
 import com.work.rest.project.murza.dto.CreateTripRequestDTO;
+import com.work.rest.project.murza.dto.TripRequestMiniSummaryDTO;
 import com.work.rest.project.murza.dto.UpdateTripRequestDTO;
 import com.work.rest.project.murza.entity.Requests.TripRequest;
 
@@ -11,6 +12,7 @@ public interface TripRequestService {
      TripRequest createTripRequest(CreateTripRequestDTO tripRequest) throws IOException;
 
      List<TripRequest> getAllTripRequests();
+     List<TripRequestMiniSummaryDTO> getAllTripRequestsWithSummary();
 
      TripRequest getTripRequestById(Long id);
 

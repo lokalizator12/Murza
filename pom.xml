@@ -16,7 +16,6 @@
     <properties>
         <java.version>22</java.version>
         <jwt.version>0.12.5</jwt.version>
-        <mapper.version>1.6.2</mapper.version>
         <amazon.version>2.28.21</amazon.version>
 
     </properties>
@@ -56,16 +55,6 @@
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>${mapper.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-            <version>${mapper.version}</version>
         </dependency>
 
         <dependency>

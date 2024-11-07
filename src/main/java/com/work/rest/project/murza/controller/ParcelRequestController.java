@@ -43,7 +43,7 @@ public class ParcelRequestController {
         return ResponseEntity.ok(parcelRequestService.getAllParcelRequests());
     }
 
-    @GetMapping(value = "/summary")
+    @GetMapping(value = "/list-summary")
     public ResponseEntity<List<ParcelRequestMiniSummaryDTO>> getAllParcelRequestsSummary() {
         log.info("Get all parcels summary");
         return ResponseEntity.ok(parcelRequestService.getAllParcelRequestsWithMiniSummary());

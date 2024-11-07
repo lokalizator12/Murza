@@ -20,6 +20,7 @@ import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @Slf4j
 @RestControllerAdvice
 public class ControllerAdvisor {
@@ -48,7 +49,7 @@ public class ControllerAdvisor {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ShippingMethodNotFoundException.class)
     public ResponseEntity<String> handleShippingMethodException(ShippingMethodNotFoundException ex) {
-        return new ResponseEntity<>(STR."Shipping method with id : \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Shipping method with id : " + ex.getMessage() + " not found", HttpStatus.NOT_FOUND);
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -60,18 +61,19 @@ public class ControllerAdvisor {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException ex) {
-        return new ResponseEntity<>(STR."User with cred. : \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("User with cred. : " + ex.getMessage() + " not found", HttpStatus.NOT_FOUND);
     }
+
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(TripRequestNotFoundException.class)
     public ResponseEntity<String> handleTripRequestNotFoundException(TripRequestNotFoundException ex) {
-        return new ResponseEntity<>(STR."Trip request with id: \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Trip request with id: " + ex.getMessage() + " not found", HttpStatus.NOT_FOUND);
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(CityNotFoundException.class)
     public ResponseEntity<String> handleCityNotFoundException(CityNotFoundException ex) {
-        return new ResponseEntity<>(STR."City with id. : \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("City with id. : " + ex.getMessage() + " not found", HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -81,7 +83,7 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(ParcelNotFoundException.class)
     public ResponseEntity<String> handleParcelNotFoundException(ParcelNotFoundException ex) {
-        return new ResponseEntity<>(STR."Parcel with id: \{ex.getMessage()} not found", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Parcel with id: " + ex.getMessage() + " not found", HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)

@@ -1,32 +1,32 @@
 package com.work.rest.project.murza.mapper;
 
-
 import com.work.rest.project.murza.dto.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.User;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
-public interface ParcelRequestMiniSummaryMapper {
+public class ParcelRequestMiniSummaryMapper {
 
-    ParcelRequestMiniSummaryMapper INSTANCE = Mappers.getMapper(ParcelRequestMiniSummaryMapper.class);
+    public static ParcelRequestMiniSummaryDTO toDto(ParcelRequest parcelRequest) {
+        ParcelRequestMiniSummaryDTO dto = new ParcelRequestMiniSummaryDTO();
+        dto.setIdParcel(parcelRequest.getIdParcel());
+        User sender = parcelRequest.getSender();
+        if (sender != null) {
+            dto.setSenderId(sender.getId());
+        }
+        List<String> photos = parcelRequest.getPhotos();
+        if (photos != null && !photos.isEmpty()) {
+            dto.setPreviewPhoto(photos.getFirst());
+        }
 
-    @Mapping(target = "senderId", source = "parcelRequest.sender", qualifiedByName = "extractSenderId")
-    @Mapping(target = "previewPhoto", source = "parcelRequest.photos", qualifiedByName = "firstPhoto")
-    ParcelRequestMiniSummaryDTO toDto(ParcelRequest parcelRequest);
-
-    @Named("firstPhoto")
-    default String firstPhoto(List<String> photos) {
-        return (photos != null && !photos.isEmpty()) ? photos.getFirst() : null;
-    }
-
-    @Named("extractSenderId")
-    default Long extractSenderId(User sender) {
-        return sender != null ? sender.getId() : null;
+        dto.setTitle(parcelRequest.getTitle());
+        dto.setSize(parcelRequest.getSize());
+        dto.setPrice(parcelRequest.getPrice());
+        dto.setPickupDate(parcelRequest.getPickupDate());
+        dto.setDeliveryDate(parcelRequest.getDeliveryDate());
+        dto.setPickupAddress(parcelRequest.getPickupAddress());
+        dto.setDeliveryAddress(parcelRequest.getDeliveryAddress());
+        return dto;
     }
 }

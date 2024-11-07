@@ -28,7 +28,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
             log.error("User not found in DB: {}", email);
-            throw new UsernameNotFoundException(STR."User not found with email : \{email}");
+            throw new UsernameNotFoundException("User not found with email : " + email);
         }
         log.info("build user credentials for boot");
         return org.springframework.security.core.userdetails.User.builder()

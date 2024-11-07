@@ -45,9 +45,8 @@ public class User implements UserDetails {
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean verificationStatus = false;
 
-    @Lob
     @Column()
-    private byte[] userPhoto;
+    private String userPhoto;
 
     @CreationTimestamp
     @Column(nullable = false)
@@ -62,7 +61,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(STR."ROLE_\{role.getName().toString()}");
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_"+role.getName().toString());
         return List.of(authority);
     }
 

@@ -30,9 +30,9 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
     @Override
     public List<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary() {
 
-        return parcelRequestRepository.findAll()
+        return parcelRequestRepository.findAllByRealized(false)
                 .stream()
-                .map(ParcelRequestMiniSummaryMapper.INSTANCE::toDto)
+                .map(ParcelRequestMiniSummaryMapper::toDto)
                 .toList();
     }
 

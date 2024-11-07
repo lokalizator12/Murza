@@ -27,7 +27,6 @@ public class TripRequest {
     @NotNull(message = "Driver cannot be null")
     private User driver;
 
-    // Местоположение отправки
     @NotNull(message = "Departure latitude is mandatory")
     private double departureLatitude;
 

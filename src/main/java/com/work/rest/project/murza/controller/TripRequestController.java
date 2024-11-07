@@ -1,6 +1,7 @@
 package com.work.rest.project.murza.controller;
 
 import com.work.rest.project.murza.dto.CreateTripRequestDTO;
+import com.work.rest.project.murza.dto.TripRequestMiniSummaryDTO;
 import com.work.rest.project.murza.dto.UpdateTripRequestDTO;
 import com.work.rest.project.murza.entity.Requests.TripRequest;
 import com.work.rest.project.murza.service.TripRequestService;
@@ -33,6 +34,12 @@ public class TripRequestController {
     public ResponseEntity<List<TripRequest>> getAllTripRequests() {
         log.info("Getting trip requests");
         return ResponseEntity.ok(tripRequestService.getAllTripRequests());
+    }
+
+    @GetMapping("/list-summary")
+    public ResponseEntity<List<TripRequestMiniSummaryDTO>> getAllTripRequestsWithSummary() {
+        log.info("Getting trip requests with summary");
+        return ResponseEntity.ok(tripRequestService.getAllTripRequestsWithSummary());
     }
 
     @GetMapping("/{id}")
