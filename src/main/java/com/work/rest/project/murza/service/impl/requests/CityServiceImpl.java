@@ -1,7 +1,6 @@
-package com.work.rest.project.murza.service.impl.Requests;
+package com.work.rest.project.murza.service.impl.requests;
 
 import com.work.rest.project.murza.entity.Requests.City;
-import com.work.rest.project.murza.entity.Requests.TripIntermediateCity;
 import com.work.rest.project.murza.exception.CityNotFoundException;
 import com.work.rest.project.murza.repository.CityRepository;
 import com.work.rest.project.murza.service.CityService;

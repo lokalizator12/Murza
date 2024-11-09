@@ -1,6 +1,5 @@
 package com.work.rest.project.murza.dto;
 
-import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import lombok.Data;
 
 import java.util.Date;
@@ -19,6 +18,4 @@ public class ParcelRequestMiniSummaryDTO {
     private Date deliveryDate;
     private String pickupAddress;
     private String deliveryAddress;
-
-
 }

@@ -1,15 +1,16 @@
-package com.work.rest.project.murza.service.impl.Requests;
+package com.work.rest.project.murza.service.impl.requests;
 
 import com.work.rest.project.murza.dto.CreateParcelRequestDTO;
+import com.work.rest.project.murza.dto.ParcelRequestMapDTO;
 import com.work.rest.project.murza.dto.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.exception.ParcelNotFoundException;
-import com.work.rest.project.murza.mapper.ParcelRequestMiniSummaryMapper;
+import com.work.rest.project.murza.mapper.ParcelMapper;
 import com.work.rest.project.murza.repository.ParcelRequestRepository;
 import com.work.rest.project.murza.service.ParcelRequestService;
 import com.work.rest.project.murza.service.UserService;
-import com.work.rest.project.murza.service.Utils.FileService;
+import com.work.rest.project.murza.service.utils.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,15 @@ import java.util.UUID;
 public class ParcelRequestServiceImpl implements ParcelRequestService {
     private final ParcelRequestRepository parcelRequestRepository;
     private final FileService fileService;
+
+    @Override
+    public List<ParcelRequestMapDTO> getAllParcelRequestsForMap() {
+        return parcelRequestRepository.findAllByRealized(false)
+                .stream()
+                .map(ParcelMapper::parcelRequestToParcelRequestMapDto)
+                .toList();
+    }
+
     private final UserService userService;
 
     @Override
@@ -32,7 +42,7 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
 
         return parcelRequestRepository.findAllByRealized(false)
                 .stream()
-                .map(ParcelRequestMiniSummaryMapper::toDto)
+                .map(ParcelMapper::parcelRequestToParcelRequestMiniSummaryDto)
                 .toList();
     }
 

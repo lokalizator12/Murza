@@ -1,6 +1,7 @@
-package com.work.rest.project.murza.service.impl.Requests;
+package com.work.rest.project.murza.service.impl.requests;
 
 import com.work.rest.project.murza.dto.CreateTripRequestDTO;
+import com.work.rest.project.murza.dto.TripRequestMapDTO;
 import com.work.rest.project.murza.dto.TripRequestMiniSummaryDTO;
 import com.work.rest.project.murza.dto.UpdateTripRequestDTO;
 import com.work.rest.project.murza.entity.ItemsDelivery;
@@ -10,7 +11,7 @@ import com.work.rest.project.murza.entity.Requests.TripRequest;
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.exception.ShippingMethodNotFoundException;
 import com.work.rest.project.murza.exception.TripRequestNotFoundException;
-import com.work.rest.project.murza.mapper.TripRequestMiniSummaryMapper;
+import com.work.rest.project.murza.mapper.TripMapper;
 import com.work.rest.project.murza.repository.ItemsDeliveryRepository;
 import com.work.rest.project.murza.repository.ShippingMethodRepository;
 import com.work.rest.project.murza.repository.TripRequestRepository;
@@ -68,10 +69,18 @@ public class TripRequestServiceImpl implements TripRequestService {
     }
 
     @Override
+    public List<TripRequestMapDTO> getAllTripRequestsForMap() {
+        return tripRequestRepository.findAllByRealized(false)
+                .stream()
+                .map(TripMapper::tripRequestToTripMapDto)
+                .toList();
+    }
+
+    @Override
     public List<TripRequestMiniSummaryDTO> getAllTripRequestsWithSummary() {
         return tripRequestRepository.findAllByRealized(false)
                 .stream()
-                .map(TripRequestMiniSummaryMapper::toDto)
+                .map(TripMapper::tripRequestToTripRequestMiniSummaryDto)
                 .toList();
     }
 

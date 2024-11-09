@@ -1,4 +1,4 @@
-package com.work.rest.project.murza.service.Utils;
+package com.work.rest.project.murza.service.utils;
 
 import org.springframework.web.multipart.MultipartFile;
 

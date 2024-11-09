@@ -2,6 +2,7 @@ package com.work.rest.project.murza.controller;
 
 
 import com.work.rest.project.murza.dto.CreateParcelRequestDTO;
+import com.work.rest.project.murza.dto.ParcelRequestMapDTO;
 import com.work.rest.project.murza.dto.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.service.ParcelRequestService;
@@ -41,6 +42,12 @@ public class ParcelRequestController {
     public ResponseEntity<List<ParcelRequest>> getAllParcelRequests() {
         log.info("Get all parcels");
         return ResponseEntity.ok(parcelRequestService.getAllParcelRequests());
+    }
+
+    @GetMapping("/list-map")
+    public ResponseEntity<List<ParcelRequestMapDTO>> getAllParcelMapRequests() {
+        log.info("Get all parcels for map");
+        return ResponseEntity.ok(parcelRequestService.getAllParcelRequestsForMap());
     }
 
     @GetMapping(value = "/list-summary")
