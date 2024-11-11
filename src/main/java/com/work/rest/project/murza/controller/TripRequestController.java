@@ -8,6 +8,7 @@ import com.work.rest.project.murza.entity.Requests.TripRequest;
 import com.work.rest.project.murza.service.TripRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,9 +39,12 @@ public class TripRequestController {
     }
 
     @GetMapping("/list-summary")
-    public ResponseEntity<List<TripRequestMiniSummaryDTO>> getAllTripRequestsWithSummary() {
+    public ResponseEntity<Page<TripRequestMiniSummaryDTO>> getAllTripRequestsWithSummary(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "7") int size
+    ) {
         log.info("Getting trip requests with summary");
-        return ResponseEntity.ok(tripRequestService.getAllTripRequestsWithSummary());
+        return ResponseEntity.ok(tripRequestService.getAllTripRequestsWithSummary(page, size));
     }
 
     @GetMapping("/list-map")

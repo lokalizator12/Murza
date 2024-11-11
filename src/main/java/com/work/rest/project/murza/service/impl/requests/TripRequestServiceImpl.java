@@ -19,6 +19,9 @@ import com.work.rest.project.murza.service.TripRequestService;
 import com.work.rest.project.murza.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -77,11 +80,10 @@ public class TripRequestServiceImpl implements TripRequestService {
     }
 
     @Override
-    public List<TripRequestMiniSummaryDTO> getAllTripRequestsWithSummary() {
-        return tripRequestRepository.findAllByRealized(false)
-                .stream()
-                .map(TripMapper::tripRequestToTripRequestMiniSummaryDto)
-                .toList();
+    public Page<TripRequestMiniSummaryDTO> getAllTripRequestsWithSummary(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return tripRequestRepository.findAllByIsRealized(false, pageable)
+                .map(TripMapper::tripRequestToTripRequestMiniSummaryDto);
     }
 
     @Override

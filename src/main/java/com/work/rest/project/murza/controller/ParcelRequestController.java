@@ -8,6 +8,7 @@ import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.service.ParcelRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,9 +52,12 @@ public class ParcelRequestController {
     }
 
     @GetMapping(value = "/list-summary")
-    public ResponseEntity<List<ParcelRequestMiniSummaryDTO>> getAllParcelRequestsSummary() {
+    public ResponseEntity<Page<ParcelRequestMiniSummaryDTO>> getAllParcelRequestsSummary(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "7") int size
+    ) {
         log.info("Get all parcels summary");
-        return ResponseEntity.ok(parcelRequestService.getAllParcelRequestsWithMiniSummary());
+        return ResponseEntity.ok(parcelRequestService.getAllParcelRequestsWithMiniSummary(page, size));
     }
 
     @GetMapping("/{id}")

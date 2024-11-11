@@ -13,6 +13,9 @@ import com.work.rest.project.murza.service.UserService;
 import com.work.rest.project.murza.service.utils.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,12 +41,10 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
     private final UserService userService;
 
     @Override
-    public List<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary() {
-
-        return parcelRequestRepository.findAllByRealized(false)
-                .stream()
-                .map(ParcelMapper::parcelRequestToParcelRequestMiniSummaryDto)
-                .toList();
+    public Page<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return parcelRequestRepository.findAllByIsRealized(false, pageable)
+                .map(ParcelMapper::parcelRequestToParcelRequestMiniSummaryDto);
     }
 
     @Override

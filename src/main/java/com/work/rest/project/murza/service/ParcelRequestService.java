@@ -4,6 +4,7 @@ import com.work.rest.project.murza.dto.CreateParcelRequestDTO;
 import com.work.rest.project.murza.dto.ParcelRequestMapDTO;
 import com.work.rest.project.murza.dto.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,7 +19,7 @@ public interface ParcelRequestService {
 
     public List<ParcelRequestMapDTO> getAllParcelRequestsForMap();
 
-    public List<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary();
+    public Page<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary(int page, int size);
 
     public ParcelRequest getParcelRequestById(UUID id);
 
