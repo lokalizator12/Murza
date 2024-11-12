@@ -20,8 +20,7 @@ public class TripMapper {
         dto.setDestinationAddress(tripRequest.getDestinationAddress());
         dto.setDepartureDate(tripRequest.getDepartureDate());
         dto.setDestinationDate(tripRequest.getDestinationDate());
-
-
+        dto.setDriverFirstName(tripRequest.getDriver().getFirstName());
         return dto;
     }
 
