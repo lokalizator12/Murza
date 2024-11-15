@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
@@ -54,9 +55,9 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<String> saveProfilePictures(List<MultipartFile> files, String userId) throws IOException {
+    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException {
         String prefix = S3Constants.PROFILE_PICTURES_PREFIX + userId + "/";
-        return saveFiles(files, prefix, userId);
+        return saveFiles(Collections.singletonList(file), prefix, userId.toString()).getFirst();
     }
 
     @Override
@@ -65,11 +66,6 @@ public class FileServiceImpl implements FileService {
         return saveFiles(files, prefix, parcelId);
     }
 
-    @Override
-    public List<String> saveTripPictures(List<MultipartFile> files, String tripId) throws IOException {
-        String prefix = S3Constants.TRIP_REQUESTS_PREFIX + tripId + "/";
-        return saveFiles(files, prefix, tripId);
-    }
 
     private String generateUniqueFileName(String prefix, int i) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));

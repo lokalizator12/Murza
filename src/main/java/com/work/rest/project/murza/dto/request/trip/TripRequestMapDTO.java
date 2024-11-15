@@ -1,4 +1,4 @@
-package com.work.rest.project.murza.dto;
+package com.work.rest.project.murza.dto.request.trip;
 
 import com.work.rest.project.murza.entity.Requests.IntermediateLocation;
 import com.work.rest.project.murza.entity.Requests.ShippingMethod;

@@ -1,6 +1,6 @@
 package com.work.rest.project.murza.bootstrap;
 
-import com.work.rest.project.murza.dto.RegisterUserDto;
+import com.work.rest.project.murza.dto.auth.RegisterUserDto;
 import com.work.rest.project.murza.entity.Role;
 import com.work.rest.project.murza.entity.RoleEnum;
 import com.work.rest.project.murza.repository.RoleRepository;

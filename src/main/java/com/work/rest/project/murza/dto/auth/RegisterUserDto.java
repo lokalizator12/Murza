@@ -1,4 +1,4 @@
-package com.work.rest.project.murza.dto;
+package com.work.rest.project.murza.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.work.rest.project.murza.entity.RoleEnum;

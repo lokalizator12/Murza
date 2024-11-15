@@ -1,7 +1,8 @@
 package com.work.rest.project.murza.mapper;
 
-import com.work.rest.project.murza.dto.ParcelRequestMapDTO;
-import com.work.rest.project.murza.dto.ParcelRequestMiniSummaryDTO;
+import com.work.rest.project.murza.dto.profile.UserParcelDto;
+import com.work.rest.project.murza.dto.request.parcel.ParcelRequestMapDTO;
+import com.work.rest.project.murza.dto.request.parcel.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.User;
 
@@ -29,6 +30,18 @@ public class ParcelMapper {
         dto.setPickupAddress(parcelRequest.getPickupAddress());
         dto.setDeliveryAddress(parcelRequest.getDeliveryAddress());
         return dto;
+    }
+
+    public static UserParcelDto parcelRequestToUserParcelDto(ParcelRequest parcelRequest) {
+        return UserParcelDto.builder()
+                .title(parcelRequest.getTitle())
+                .origin(parcelRequest.getPickupAddress())
+                .destination(parcelRequest.getDeliveryAddress())
+                .arrivalDate(parcelRequest.getPickupDate())
+                .departureDate(parcelRequest.getDeliveryDate())
+                .status(parcelRequest.isRealized())
+                .idParcel(parcelRequest.getIdParcel())
+                .build();
     }
 
 

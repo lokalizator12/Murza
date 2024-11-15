@@ -1,8 +1,8 @@
 package com.work.rest.project.murza.controller;
 
-import com.work.rest.project.murza.dto.AuthenticateResponseDto;
-import com.work.rest.project.murza.dto.LoginUserDto;
-import com.work.rest.project.murza.dto.RegisterUserDto;
+import com.work.rest.project.murza.dto.auth.AuthenticateResponseDto;
+import com.work.rest.project.murza.dto.auth.LoginUserDto;
+import com.work.rest.project.murza.dto.auth.RegisterUserDto;
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;

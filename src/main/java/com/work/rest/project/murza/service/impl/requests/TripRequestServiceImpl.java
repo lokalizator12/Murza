@@ -1,9 +1,10 @@
 package com.work.rest.project.murza.service.impl.requests;
 
-import com.work.rest.project.murza.dto.CreateTripRequestDTO;
-import com.work.rest.project.murza.dto.TripRequestMapDTO;
-import com.work.rest.project.murza.dto.TripRequestMiniSummaryDTO;
-import com.work.rest.project.murza.dto.UpdateTripRequestDTO;
+import com.work.rest.project.murza.dto.profile.UserTripDto;
+import com.work.rest.project.murza.dto.request.trip.CreateTripRequestDTO;
+import com.work.rest.project.murza.dto.request.trip.TripRequestMapDTO;
+import com.work.rest.project.murza.dto.request.trip.TripRequestMiniSummaryDTO;
+import com.work.rest.project.murza.dto.request.trip.UpdateTripRequestDTO;
 import com.work.rest.project.murza.entity.ItemsDelivery;
 import com.work.rest.project.murza.entity.Requests.IntermediateLocation;
 import com.work.rest.project.murza.entity.Requests.ShippingMethod;
@@ -11,12 +12,14 @@ import com.work.rest.project.murza.entity.Requests.TripRequest;
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.exception.ShippingMethodNotFoundException;
 import com.work.rest.project.murza.exception.TripRequestNotFoundException;
+import com.work.rest.project.murza.exception.UserNotFoundException;
 import com.work.rest.project.murza.mapper.TripMapper;
 import com.work.rest.project.murza.repository.ItemsDeliveryRepository;
 import com.work.rest.project.murza.repository.ShippingMethodRepository;
 import com.work.rest.project.murza.repository.TripRequestRepository;
-import com.work.rest.project.murza.service.TripRequestService;
+import com.work.rest.project.murza.repository.UserRepository;
 import com.work.rest.project.murza.service.UserService;
+import com.work.rest.project.murza.service.request.TripRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,6 +35,7 @@ import java.util.List;
 public class TripRequestServiceImpl implements TripRequestService {
     private final ShippingMethodRepository shippingMethodRepository;
     private final TripRequestRepository tripRequestRepository;
+    private final UserRepository userRepository;
     private final ItemsDeliveryRepository itemsDeliveryRepository;
     private final UserService userService;
 
@@ -64,6 +68,15 @@ public class TripRequestServiceImpl implements TripRequestService {
         log.info("Trip request created: {}", savedTripRequest);
 
         return savedTripRequest;
+    }
+
+    @Override
+    public List<UserTripDto> findByDriver(Long userid) {
+        User driver = userRepository.findById(userid).orElseThrow(() -> new UserNotFoundException(userid.toString()));
+        return tripRequestRepository.findAllByDriver(driver)
+                .stream()
+                .map(TripMapper::tripRequestToUserTripDto)
+                .toList();
     }
 
     @Override

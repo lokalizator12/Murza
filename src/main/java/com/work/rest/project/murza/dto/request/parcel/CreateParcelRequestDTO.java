@@ -1,4 +1,4 @@
-package com.work.rest.project.murza.dto;
+package com.work.rest.project.murza.dto.request.parcel;
 
 
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
@@ -6,7 +6,6 @@ import com.work.rest.project.murza.entity.User;
 import lombok.Data;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Data

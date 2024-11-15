@@ -1,15 +1,18 @@
 package com.work.rest.project.murza.service.impl.requests;
 
-import com.work.rest.project.murza.dto.CreateParcelRequestDTO;
-import com.work.rest.project.murza.dto.ParcelRequestMapDTO;
-import com.work.rest.project.murza.dto.ParcelRequestMiniSummaryDTO;
+import com.work.rest.project.murza.dto.profile.UserParcelDto;
+import com.work.rest.project.murza.dto.request.parcel.CreateParcelRequestDTO;
+import com.work.rest.project.murza.dto.request.parcel.ParcelRequestMapDTO;
+import com.work.rest.project.murza.dto.request.parcel.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.exception.ParcelNotFoundException;
+import com.work.rest.project.murza.exception.UserNotFoundException;
 import com.work.rest.project.murza.mapper.ParcelMapper;
 import com.work.rest.project.murza.repository.ParcelRequestRepository;
-import com.work.rest.project.murza.service.ParcelRequestService;
+import com.work.rest.project.murza.repository.UserRepository;
 import com.work.rest.project.murza.service.UserService;
+import com.work.rest.project.murza.service.request.ParcelRequestService;
 import com.work.rest.project.murza.service.utils.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ParcelRequestServiceImpl implements ParcelRequestService {
     private final ParcelRequestRepository parcelRequestRepository;
+    private final UserRepository userRepository;
     private final FileService fileService;
 
     @Override
@@ -68,6 +72,17 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
     @Override
     public ParcelRequest getParcelRequestById(UUID id) {
         return parcelRequestRepository.findById(id).orElseThrow(() -> new ParcelNotFoundException(id.toString()));
+    }
+
+    @Override
+    public List<UserParcelDto> findBySender(Long id) {
+        User sender = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id.toString()));
+        return parcelRequestRepository
+                .findAllBySender(sender)
+                .stream()
+                .map(ParcelMapper::parcelRequestToUserParcelDto)
+                .toList();
     }
 
     @Override

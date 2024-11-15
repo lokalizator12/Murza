@@ -1,4 +1,4 @@
-package com.work.rest.project.murza.dto;
+package com.work.rest.project.murza.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;

@@ -1,7 +1,8 @@
 package com.work.rest.project.murza.mapper;
 
-import com.work.rest.project.murza.dto.TripRequestMapDTO;
-import com.work.rest.project.murza.dto.TripRequestMiniSummaryDTO;
+import com.work.rest.project.murza.dto.profile.UserTripDto;
+import com.work.rest.project.murza.dto.request.trip.TripRequestMapDTO;
+import com.work.rest.project.murza.dto.request.trip.TripRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.TripRequest;
 
 public class TripMapper {
@@ -24,6 +25,16 @@ public class TripMapper {
         return dto;
     }
 
+    public static UserTripDto tripRequestToUserTripDto(TripRequest tripRequest) {
+        return UserTripDto.builder()
+                .idTrip(tripRequest.getIdTrip())
+                .status(tripRequest.isRealized())
+                .origin(tripRequest.getDepartureAddress())
+                .destination(tripRequest.getDestinationAddress())
+                .departureDate(tripRequest.getDepartureDate())
+                .arrivalDate(tripRequest.getDestinationDate())
+                .build();
+    }
 
     public static TripRequestMapDTO tripRequestToTripMapDto(TripRequest tripRequest) {
         TripRequestMapDTO dto = new TripRequestMapDTO();

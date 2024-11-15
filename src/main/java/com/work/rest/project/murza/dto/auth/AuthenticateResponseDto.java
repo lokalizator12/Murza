@@ -1,4 +1,4 @@
-package com.work.rest.project.murza.dto;
+package com.work.rest.project.murza.dto.auth;
 
 import lombok.Builder;
 import lombok.Getter;

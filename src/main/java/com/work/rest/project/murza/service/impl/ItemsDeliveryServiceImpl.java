@@ -1,6 +1,5 @@
 package com.work.rest.project.murza.service.impl;
 
-import com.work.rest.project.murza.dto.ItemsDeliveryDTO;
 import com.work.rest.project.murza.entity.ItemsDelivery;
 import com.work.rest.project.murza.repository.ItemsDeliveryRepository;
 import com.work.rest.project.murza.service.ItemsDeliveryService;

@@ -1,9 +1,10 @@
-package com.work.rest.project.murza.service;
+package com.work.rest.project.murza.service.request;
 
-import com.work.rest.project.murza.dto.CreateTripRequestDTO;
-import com.work.rest.project.murza.dto.TripRequestMapDTO;
-import com.work.rest.project.murza.dto.TripRequestMiniSummaryDTO;
-import com.work.rest.project.murza.dto.UpdateTripRequestDTO;
+import com.work.rest.project.murza.dto.profile.UserTripDto;
+import com.work.rest.project.murza.dto.request.trip.CreateTripRequestDTO;
+import com.work.rest.project.murza.dto.request.trip.TripRequestMapDTO;
+import com.work.rest.project.murza.dto.request.trip.TripRequestMiniSummaryDTO;
+import com.work.rest.project.murza.dto.request.trip.UpdateTripRequestDTO;
 import com.work.rest.project.murza.entity.Requests.TripRequest;
 import org.springframework.data.domain.Page;
 
@@ -12,6 +13,8 @@ import java.util.List;
 
 public interface TripRequestService {
     TripRequest createTripRequest(CreateTripRequestDTO tripRequest) throws IOException;
+
+    List<UserTripDto> findByDriver(Long userId);
 
     List<TripRequest> getAllTripRequests();
 

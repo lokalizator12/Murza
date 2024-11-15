@@ -1,11 +1,12 @@
 package com.work.rest.project.murza.controller;
 
-import com.work.rest.project.murza.dto.CreateTripRequestDTO;
-import com.work.rest.project.murza.dto.TripRequestMapDTO;
-import com.work.rest.project.murza.dto.TripRequestMiniSummaryDTO;
-import com.work.rest.project.murza.dto.UpdateTripRequestDTO;
+import com.work.rest.project.murza.dto.profile.UserTripDto;
+import com.work.rest.project.murza.dto.request.trip.CreateTripRequestDTO;
+import com.work.rest.project.murza.dto.request.trip.TripRequestMapDTO;
+import com.work.rest.project.murza.dto.request.trip.TripRequestMiniSummaryDTO;
+import com.work.rest.project.murza.dto.request.trip.UpdateTripRequestDTO;
 import com.work.rest.project.murza.entity.Requests.TripRequest;
-import com.work.rest.project.murza.service.TripRequestService;
+import com.work.rest.project.murza.service.request.TripRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -57,6 +59,12 @@ public class TripRequestController {
     public ResponseEntity<TripRequest> getTripRequestById(@PathVariable Long id) {
         log.info("Getting trip request with id:{}", id);
         return ResponseEntity.ok(tripRequestService.getTripRequestById(id));
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<UserTripDto>> getTripRequestByUser(@PathVariable Long userId) {
+        log.info("Getting trip requests for user with id:{}", userId);
+        return ResponseEntity.ok(tripRequestService.findByDriver(userId));
     }
 
     @DeleteMapping("/{id}")

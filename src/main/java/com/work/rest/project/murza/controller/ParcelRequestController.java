@@ -1,11 +1,12 @@
 package com.work.rest.project.murza.controller;
 
 
-import com.work.rest.project.murza.dto.CreateParcelRequestDTO;
-import com.work.rest.project.murza.dto.ParcelRequestMapDTO;
-import com.work.rest.project.murza.dto.ParcelRequestMiniSummaryDTO;
+import com.work.rest.project.murza.dto.profile.UserParcelDto;
+import com.work.rest.project.murza.dto.request.parcel.CreateParcelRequestDTO;
+import com.work.rest.project.murza.dto.request.parcel.ParcelRequestMapDTO;
+import com.work.rest.project.murza.dto.request.parcel.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
-import com.work.rest.project.murza.service.ParcelRequestService;
+import com.work.rest.project.murza.service.request.ParcelRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -64,6 +65,12 @@ public class ParcelRequestController {
     public ResponseEntity<ParcelRequest> getParcelRequestById(@PathVariable UUID id) {
         log.info("Get parcel with id: {}", id);
         return ResponseEntity.ok(parcelRequestService.getParcelRequestById(id));
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<UserParcelDto>> getParcelRequestsByUserId(@PathVariable Long userId) {
+        log.info("Get parcels for user with id: {}", userId);
+        return ResponseEntity.ok(parcelRequestService.findBySender(userId));
     }
 
     @DeleteMapping("/{id}")
