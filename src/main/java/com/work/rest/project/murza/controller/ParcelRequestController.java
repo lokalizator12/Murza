@@ -68,9 +68,12 @@ public class ParcelRequestController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserParcelDto>> getParcelRequestsByUserId(@PathVariable Long userId) {
+    public ResponseEntity<Page<UserParcelDto>> getParcelRequestsByUserId(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
         log.info("Get parcels for user with id: {}", userId);
-        return ResponseEntity.ok(parcelRequestService.findBySender(userId));
+        return ResponseEntity.ok(parcelRequestService.findBySender(userId, page, size));
     }
 
     @DeleteMapping("/{id}")

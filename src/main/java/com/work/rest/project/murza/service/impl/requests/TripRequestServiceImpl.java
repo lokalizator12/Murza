@@ -71,12 +71,12 @@ public class TripRequestServiceImpl implements TripRequestService {
     }
 
     @Override
-    public List<UserTripDto> findByDriver(Long userid) {
+    public Page<UserTripDto> findByDriver(Long userid, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         User driver = userRepository.findById(userid).orElseThrow(() -> new UserNotFoundException(userid.toString()));
-        return tripRequestRepository.findAllByDriver(driver)
-                .stream()
-                .map(TripMapper::tripRequestToUserTripDto)
-                .toList();
+        return tripRequestRepository.findAllByDriver(driver, pageable)
+                .map(TripMapper::tripRequestToUserTripDto);
+
     }
 
     @Override

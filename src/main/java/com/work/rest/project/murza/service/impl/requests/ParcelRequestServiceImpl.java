@@ -75,14 +75,13 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
     }
 
     @Override
-    public List<UserParcelDto> findBySender(Long id) {
+    public Page<UserParcelDto> findBySender(Long id, int page, int size) {
         User sender = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id.toString()));
+        Pageable pageable = PageRequest.of(page, size);
         return parcelRequestRepository
-                .findAllBySender(sender)
-                .stream()
-                .map(ParcelMapper::parcelRequestToUserParcelDto)
-                .toList();
+                .findAllBySender(sender, pageable)
+                .map(ParcelMapper::parcelRequestToUserParcelDto);
     }
 
     @Override

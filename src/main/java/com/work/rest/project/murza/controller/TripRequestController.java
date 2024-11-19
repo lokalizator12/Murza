@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -62,9 +61,12 @@ public class TripRequestController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserTripDto>> getTripRequestByUser(@PathVariable Long userId) {
+    public ResponseEntity<Page<UserTripDto>> getTripRequestByUser(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
         log.info("Getting trip requests for user with id:{}", userId);
-        return ResponseEntity.ok(tripRequestService.findByDriver(userId));
+        return ResponseEntity.ok(tripRequestService.findByDriver(userId, page, size));
     }
 
     @DeleteMapping("/{id}")

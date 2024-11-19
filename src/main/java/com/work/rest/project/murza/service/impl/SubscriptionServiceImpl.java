@@ -98,4 +98,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subscriptionRepository.countFollowing(userId);
     }
 
+    @Override
+    public boolean isFollowing(Long currentUserId, Long followedId) {
+        return subscriptionRepository.existsByFollowerIdAndFollowedId(currentUserId, followedId);
+    }
 }

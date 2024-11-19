@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/profiles")
 @RequiredArgsConstructor
 @Validated
+@CrossOrigin
 public class UserProfileController {
 
     private final UserService userProfileService;
@@ -48,45 +49,16 @@ public class UserProfileController {
         return ResponseEntity.ok(status);
     }
 
-   /* @PostMapping("/subscribe/{id}")
-    public ResponseEntity<Void> subscribeToUser(@AuthenticationPrincipal User currentUser, @PathVariable Long id) {
-        userProfileService.subscribeToUser(currentUser.getId(), id);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @GetMapping("/is-owner/{id}")
+    public ResponseEntity<Boolean> isOwner(@AuthenticationPrincipal User currentUser, @PathVariable Long id) {
+        boolean isOwner = currentUser.getId().equals(id);
+        return ResponseEntity.ok(isOwner);
     }
 
-    @GetMapping("/{id}/followers")
-    public ResponseEntity<?> getUserFollowers(@PathVariable Long id) {
-        return ResponseEntity.ok(userProfileService.getFollowers(id));
-    }
-
-    @GetMapping("/{id}/following")
-    public ResponseEntity<?> getUserFollowing(@PathVariable Long id) {
-        return ResponseEntity.ok(userProfileService.getFollowing(id));
-    }
-
-    @PostMapping("/{id}/review")
+   /* @PostMapping("/{id}/review")
     public ResponseEntity<Void> addReview(@AuthenticationPrincipal User currentUser, @PathVariable Long id, @RequestBody String review, @RequestParam int rating) {
         userProfileService.addReview(id, currentUser.getId(), review, rating);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-
-    @GetMapping("/{id}/reviews")
-    public ResponseEntity<List<UserReviewsDto>> getUserReviews(@PathVariable Long id) {
-        return ResponseEntity.ok(userProfileService.getUserReviews(id));
-    }
-
-    @GetMapping("/{id}/trips")
-    public ResponseEntity<List<UserTripsDto>> getUserTrips(@PathVariable Long id) {
-        return ResponseEntity.ok(userProfileService.getUserTrips(id));
-    }
-
-    @GetMapping("/{id}/parcels")
-    public ResponseEntity<List<UserTripsDto>> getUserParcels(@PathVariable Long id) {
-        return ResponseEntity.ok(userProfileService.getUserParcels(id));
-    }
-
-    @GetMapping("/{id}/vehicle")
-    public ResponseEntity<UserVehicleDto> getUserVehicle(@PathVariable Long id) {
-        return ResponseEntity.ok(userProfileService.getUserVehicle(id));
-    }*/
+*/
 }

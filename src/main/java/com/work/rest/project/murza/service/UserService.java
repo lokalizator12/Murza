@@ -34,4 +34,6 @@ public interface UserService {
     String getUserStatus(Long id);
 
     User getUserById(Long userId);
+
+    UserSettingsDto getUserSettings(Long id);
 }

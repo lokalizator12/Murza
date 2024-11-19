@@ -24,4 +24,5 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     @Query("SELECT COUNT(s) FROM Subscription s WHERE s.follower.id = :userId")
     int countFollowing(@Param("userId") Long userId);
 
+    boolean existsByFollowerIdAndFollowedId(Long currentUserId, Long followedId);
 }

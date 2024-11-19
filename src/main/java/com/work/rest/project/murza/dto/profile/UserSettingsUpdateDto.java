@@ -17,7 +17,7 @@ public class UserSettingsUpdateDto {
     @Pattern(regexp = "\\+?[0-9]{10,15}", message = "Invalid phone number format")
     private String phoneNumber;
 
-    @NotBlank
+    @NotBlank(message = "Current password is required for any changes.")
     private String currentPassword;
 
     @Size(min = 6, message = "New password must be at least 6 characters long")

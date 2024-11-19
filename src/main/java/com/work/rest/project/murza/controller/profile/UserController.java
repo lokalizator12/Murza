@@ -29,4 +29,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userSettingsDto);
     }
 
+    @GetMapping("/settings")
+    public ResponseEntity<UserSettingsDto> getUserSettings(@AuthenticationPrincipal User currentUser) {
+        UserSettingsDto userSettingsDto = userService.getUserSettings(currentUser.getId());
+        return ResponseEntity.ok(userSettingsDto);
+    }
+
 }

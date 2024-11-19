@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/v1/subscriptions")
 @RequiredArgsConstructor
 public class SubscriptionController {
@@ -47,5 +48,11 @@ public class SubscriptionController {
     public ResponseEntity<Integer> getFollowingCount(@PathVariable Long userId) {
         int followingCount = subscriptionService.getCountFollowing(userId);
         return ResponseEntity.ok(followingCount);
+    }
+
+    @GetMapping("/{followedId}/is-following")
+    public ResponseEntity<Boolean> isFollowing(@PathVariable Long followedId, @AuthenticationPrincipal User currentUser) {
+        boolean isFollowing = subscriptionService.isFollowing(currentUser.getId(), followedId);
+        return ResponseEntity.ok(isFollowing);
     }
 }

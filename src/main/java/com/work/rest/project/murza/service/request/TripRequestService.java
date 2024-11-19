@@ -14,7 +14,7 @@ import java.util.List;
 public interface TripRequestService {
     TripRequest createTripRequest(CreateTripRequestDTO tripRequest) throws IOException;
 
-    List<UserTripDto> findByDriver(Long userId);
+    Page<UserTripDto> findByDriver(Long userId, int page, int size);
 
     List<TripRequest> getAllTripRequests();
 

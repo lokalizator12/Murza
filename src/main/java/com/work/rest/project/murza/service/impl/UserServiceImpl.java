@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
             user.setPhoneNumber(settingsDto.getPhoneNumber());
         }
 
-        if (settingsDto.getNewPassword() != null) {
+        if (settingsDto.getNewPassword() != null && settingsDto.getNewPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(settingsDto.getNewPassword()));
         }
 
@@ -135,11 +135,16 @@ public class UserServiceImpl implements UserService {
 
         user.setFirstName(userProfileDto.getFirstName());
         user.setLastName(userProfileDto.getLastName());
-        try {
-            user.setUserPhoto(fileService.saveProfilePicture(userProfileDto.getUserPhoto(), id));
-        } catch (IOException e) {
-            throw new FileServiceException(e.getMessage());
+
+        // Проверяем, передан ли файл для фотографии
+        if (userProfileDto.getUserPhoto() != null && !userProfileDto.getUserPhoto().isEmpty()) {
+            try {
+                user.setUserPhoto(fileService.saveProfilePicture(userProfileDto.getUserPhoto(), id));
+            } catch (IOException e) {
+                throw new FileServiceException(e.getMessage());
+            }
         }
+
         userRepository.save(user);
 
         return UserMapper.toUserProfileDto(user);
@@ -155,5 +160,14 @@ public class UserServiceImpl implements UserService {
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserSettingsDto getUserSettings(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id.toString()));
+
+        return UserMapper.toUserSettingsDto(user);
     }
 }

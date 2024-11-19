@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -21,5 +20,5 @@ public interface ParcelRequestRepository extends JpaRepository<ParcelRequest, UU
     @Query(value = "SELECT p from ParcelRequest p where p.isRealized = ?1")
     List<ParcelRequest> findAllByRealized(Boolean realized);
 
-    List<ParcelRequest> findAllBySender(User sender);
+    Page<ParcelRequest> findAllBySender(User sender, Pageable pageable);
 }
