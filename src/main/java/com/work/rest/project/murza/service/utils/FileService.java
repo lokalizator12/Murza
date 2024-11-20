@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.util.List;
 
 public interface FileService {
-    public List<String> saveFiles(List<MultipartFile> files, String prefix, String entityId) throws IOException;
-    public String saveProfilePicture(MultipartFile file, Long userId) throws IOException;
-    public List<String> saveParcelPictures(List<MultipartFile> files, String parcelId) throws IOException;
+    List<String> saveFiles(List<MultipartFile> files, String prefix, String entityId) throws IOException;
+
+    String saveProfilePicture(MultipartFile file, Long userId) throws IOException;
+
+    List<String> saveParcelPictures(List<MultipartFile> files, String parcelId) throws IOException;
 }

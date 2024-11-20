@@ -15,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/profiles")
+@RequestMapping("/api/v1/profile")
 @RequiredArgsConstructor
 @Validated
 @CrossOrigin
@@ -23,7 +23,7 @@ public class UserProfileController {
 
     private final UserService userProfileService;
 
-    @GetMapping("/me")
+    @GetMapping
     public ResponseEntity<UserProfileDto> getMyProfile(@AuthenticationPrincipal User currentUser) {
         UserProfileDto profileDto = userProfileService.getUserProfile(currentUser.getId(), true);
         return ResponseEntity.ok(profileDto);
@@ -36,7 +36,7 @@ public class UserProfileController {
         return ResponseEntity.ok(profileDto);
     }
 
-    @PutMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserProfileDto> updateMyProfile(@AuthenticationPrincipal User currentUser,
                                                           @ModelAttribute @Valid UserProfileUpdateDto userProfileDto) {
         UserProfileDto updatedProfile = userProfileService.updateUserProfile(currentUser.getId(), userProfileDto);

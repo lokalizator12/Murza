@@ -9,6 +9,7 @@ import com.work.rest.project.murza.repository.RoleRepository;
 import com.work.rest.project.murza.repository.UserRepository;
 import com.work.rest.project.murza.service.AuthenticationService;
 import com.work.rest.project.murza.service.BlacklistJwtService;
+import com.work.rest.project.murza.service.UserDetailsService;
 import com.work.rest.project.murza.service.security.JwtService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final AuthenticationManager authenticationManager;
+    private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
     private final BlacklistJwtService blacklistService;
 
@@ -78,17 +81,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public void logoutJwt(HttpServletRequest request, HttpServletResponse response) {
-        String jwtToken = request.getHeader("Authorization").substring(7);
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Invalid or missing Authorization header");
+        }
+
+        String jwtToken = authorizationHeader.substring(7);
+
+        if (blacklistService.isTokenBlacklisted(jwtToken)) {
+            throw new IllegalStateException("Token is already blacklisted");
+        }
+
         blacklistService.addTokenToBlacklist(jwtToken);
-        Cookie jwtCookie = new Cookie("jwt", null);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setMaxAge(0);
-        jwtCookie.setPath("/");
-        response.addCookie(jwtCookie);
+
+        Cookie refreshCookie = new Cookie("refresh-token", null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/api/auth/refresh");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
     }
 
+
     @Override
-    public AuthenticateResponseDto authenticate(@Valid LoginUserDto input,  HttpServletResponse response) {
+    public AuthenticateResponseDto authenticate(@Valid LoginUserDto input, HttpServletResponse response) {
         log.info("Start authentication");
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -98,18 +113,46 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
         log.info("Search profile with email: {}", input.getEmail());
         User newUser = userRepository.findByEmail(input.getEmail()).get();
-        String jwtToken = jwtService.generateToken(newUser);
+        String accessToken = jwtService.generateToken(newUser);
+        String refreshToken = jwtService.generateRefreshToken(newUser);
         log.info("Token generated");
 
-        AuthenticateResponseDto authenticateResponseDto = AuthenticateResponseDto.builder()
-                .token(jwtToken)
-                .expiresIn(jwtService.getJwtExpirationInMs()).build();
-        Cookie jwtCookie = new Cookie("jwt", authenticateResponseDto.getToken());
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(true);
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(authenticateResponseDto.getExpiresIn() / 1000);
-        response.addCookie(jwtCookie);
-        return authenticateResponseDto;
+        Cookie refreshCookie = new Cookie("refresh-token", refreshToken);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/api/auth/refresh");
+        refreshCookie.setMaxAge(jwtService.getRefreshExpirationInMs() / 1000);
+        response.addCookie(refreshCookie);
+
+        return AuthenticateResponseDto.builder()
+                .token(accessToken)
+                .expiresIn(jwtService.getJwtExpirationInMs())
+                .userId(newUser.getId())
+                .build();
+    }
+
+    @Override
+    public AuthenticateResponseDto refreshJwt(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refresh-token".equals(cookie.getName())) {
+                    String refreshToken = cookie.getValue();
+                    String username = jwtService.extractUsername(refreshToken);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                    if (jwtService.isRefreshTokenValid(refreshToken, userDetails)) {
+                        String newAccessToken = jwtService.generateToken(userDetails);
+                        return
+                                AuthenticateResponseDto.builder()
+                                        .token(newAccessToken)
+                                        .expiresIn(jwtService.getJwtExpirationInMs())
+                                        .build();
+
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

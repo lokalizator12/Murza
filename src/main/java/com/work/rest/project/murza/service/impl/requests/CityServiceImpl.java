@@ -20,6 +20,7 @@ public class CityServiceImpl implements CityService {
         Optional<City> city = cityRepository.findById(cityId);
         return city.orElseThrow(() -> new CityNotFoundException(cityId.toString()));
     }
+
     @Override
     public List<City> getCitiesByIds(List<Long> cities) {
         return cityRepository.findAllById(cities);

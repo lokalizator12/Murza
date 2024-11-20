@@ -14,9 +14,9 @@ import java.util.List;
 public interface TripRequestRepository extends JpaRepository<TripRequest, Long> {
 
     @Query(value = "SELECT t FROM TripRequest t where t.isRealized = ?1")
-    public List<TripRequest> findAllByRealized(Boolean realized);
+    List<TripRequest> findAllByRealized(Boolean realized);
 
-    public Page<TripRequest> findAllByDriver(User driver, Pageable pageable);
+    Page<TripRequest> findAllByDriver(User driver, Pageable pageable);
 
-    public Page<TripRequest> findAllByIsRealized(Boolean realized, Pageable pageable);
+    Page<TripRequest> findAllByIsRealized(Boolean realized, Pageable pageable);
 }

@@ -50,9 +50,25 @@ public class AuthenticationController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        log.info("Start logout service");
-        authenticationService.logoutJwt(request, response);
-        log.info("Logout successful ");
-        return ResponseEntity.ok("Token deleted. User is successfully logout.");
+        log.info("Logout initiated");
+        try {
+            authenticationService.logoutJwt(request, response);
+            log.info("Logout successful");
+            return ResponseEntity.ok("Logout successful");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.warn("Logout failed: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthenticateResponseDto> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        AuthenticateResponseDto authenticateResponseDto = authenticationService.refreshJwt(request, response);
+        return (authenticateResponseDto != null) ?
+                ResponseEntity.ok(authenticateResponseDto)
+                :
+                ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    }
+
+
 }

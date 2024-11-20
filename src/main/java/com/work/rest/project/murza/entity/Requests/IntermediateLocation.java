@@ -1,7 +1,6 @@
 package com.work.rest.project.murza.entity.Requests;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.work.rest.project.murza.entity.Requests.TripRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

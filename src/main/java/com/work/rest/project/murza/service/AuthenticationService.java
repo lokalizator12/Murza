@@ -10,6 +10,10 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface AuthenticationService {
 
     User signUp(RegisterUserDto userDto);
+
     void logoutJwt(HttpServletRequest request, HttpServletResponse response);
+
     AuthenticateResponseDto authenticate(LoginUserDto input, HttpServletResponse response);
+
+    AuthenticateResponseDto refreshJwt(HttpServletRequest request, HttpServletResponse response);
 }

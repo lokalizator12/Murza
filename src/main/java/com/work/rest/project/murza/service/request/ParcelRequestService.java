@@ -13,19 +13,19 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ParcelRequestService {
-    public ParcelRequest createParcelRequest(CreateParcelRequestDTO parcelRequest, List<MultipartFile> files) throws IOException;
+    ParcelRequest createParcelRequest(CreateParcelRequestDTO parcelRequest, List<MultipartFile> files) throws IOException;
 
 
-    public List<ParcelRequest> getAllParcelRequests();
+    List<ParcelRequest> getAllParcelRequests();
 
-    public List<ParcelRequestMapDTO> getAllParcelRequestsForMap();
+    List<ParcelRequestMapDTO> getAllParcelRequestsForMap();
 
-    public Page<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary(int page, int size);
+    Page<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary(int page, int size);
 
-    public ParcelRequest getParcelRequestById(UUID id);
+    ParcelRequest getParcelRequestById(UUID id);
 
-    public Page<UserParcelDto> findBySender(Long sender, int page, int size);
+    Page<UserParcelDto> findBySender(Long sender, int page, int size);
 
-    public void deleteParcelRequest(UUID id);
+    void deleteParcelRequest(UUID id);
 
 }

@@ -12,6 +12,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class BlacklistJwtServiceImpl implements BlacklistJwtService {
     private final BlacklistTokenRepository blacklistTokenRepository;
+
     @Override
     public void addTokenToBlacklist(String token) {
         BlacklistToken blacklistedToken = new BlacklistToken();

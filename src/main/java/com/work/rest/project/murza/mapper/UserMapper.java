@@ -29,6 +29,7 @@ public class UserMapper {
                 .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .avatar(user.getUserPhoto())
                 .build();
     }
 
