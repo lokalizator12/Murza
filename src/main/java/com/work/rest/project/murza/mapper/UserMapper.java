@@ -16,7 +16,7 @@ public class UserMapper {
                 .userPhoto(user.getUserPhoto())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .verificationStatus(user.isVerificationStatus())
+                .verificationStatus(user.isVerificationStatusEmail() || user.isVerificationStatusPhone())
                 .averageRating(5f)
                 .dateRegistered(user.getRegisteredAt())
                 .followersCount(99)
@@ -37,7 +37,8 @@ public class UserMapper {
         return UserSettingsDto.builder()
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
-                .verificationStatus(user.isVerificationStatus())
+                .emailVerified(user.isVerificationStatusEmail())
+                .phoneVerified(user.isVerificationStatusPhone())
                 .build();
 
     }

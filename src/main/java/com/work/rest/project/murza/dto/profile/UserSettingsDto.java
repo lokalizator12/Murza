@@ -8,5 +8,6 @@ import lombok.Data;
 public class UserSettingsDto {
     private String email;
     private String phoneNumber;
-    private boolean verificationStatus;
+    private boolean phoneVerified;
+    private boolean emailVerified;
 }

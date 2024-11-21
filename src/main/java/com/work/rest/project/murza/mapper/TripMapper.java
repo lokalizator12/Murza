@@ -14,7 +14,7 @@ public class TripMapper {
 
         if (tripRequest.getDriver() != null) {
             dto.setDriverId(tripRequest.getDriver().getId());
-            dto.setDriverPhoto(tripRequest.getDriver().getUserPhoto());
+            dto.setPreviewPhoto(tripRequest.getDriver().getUserPhoto());
         }
 
         dto.setDepartureAddress(tripRequest.getDepartureAddress());

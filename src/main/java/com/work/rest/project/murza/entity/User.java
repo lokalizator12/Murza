@@ -43,7 +43,10 @@ public class User implements UserDetails {
     private String password;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean verificationStatus = false;
+    private boolean verificationStatusEmail = false;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean verificationStatusPhone = false;
 
     @Column()
     private String userPhoto;
@@ -89,6 +92,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 
 }

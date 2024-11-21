@@ -11,7 +11,7 @@ public class TripRequestMiniSummaryDTO {
     private Long idTrip;
     private Long driverId;
     private String driverFirstName;
-    private String driverPhoto;
+    private String previewPhoto;
     private String departureAddress;
     private String destinationAddress;
     private Date departureDate;

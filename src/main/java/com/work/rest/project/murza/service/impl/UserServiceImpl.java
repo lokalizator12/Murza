@@ -71,7 +71,6 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(settingsDto.getNewPassword()));
         }
 
-        user.setVerificationStatus(settingsDto.isVerificationStatus());
 
         userRepository.save(user);
 

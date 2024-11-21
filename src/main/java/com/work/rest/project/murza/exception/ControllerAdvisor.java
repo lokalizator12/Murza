@@ -66,6 +66,33 @@ public class ControllerAdvisor {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "Parcel not found", List.of(errorDetail));
     }
 
+    @ExceptionHandler(VerificationCodeNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleVerificationCodeNotFoundException(VerificationCodeNotFoundException ex) {
+        log.warn(ex.getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("VerificationCodeId", ex.getMessage());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Verification code error", List.of(errorDetail));
+    }
+
+    @ExceptionHandler(SmsSendingException.class)
+    public ResponseEntity<ApiErrorResponse> handleSmsSendingException(SmsSendingException ex) {
+        log.warn(ex.getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("Sms Sending Exception ", ex.getMessage());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Sms Sending Exception", List.of(errorDetail));
+    }
+
+    public ResponseEntity<ApiErrorResponse> handleEmailSendingException(EmailSendingException ex) {
+        log.warn(ex.getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("Email Sending Exception ", ex.getMessage());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Email Sending Exception", List.of(errorDetail));
+    }
+
+    @ExceptionHandler(VerificationCodeExpiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleVerificationCodeExpiredException(VerificationCodeExpiredException ex) {
+        log.warn(ex.getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("VerificationCodeId expired", ex.getMessage());
+        return buildErrorResponse(HttpStatus.FORBIDDEN, "Verification code expiration error", List.of(errorDetail));
+    }
+
     @ExceptionHandler(SubscribeException.class)
     public ResponseEntity<ApiErrorResponse> handleSubscribeException(SubscribeException ex) {
         log.warn(ex.getMessage());
