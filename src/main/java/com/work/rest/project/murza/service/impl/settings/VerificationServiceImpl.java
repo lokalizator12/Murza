@@ -2,9 +2,7 @@ package com.work.rest.project.murza.service.impl.settings;
 
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.entity.VerificationCode;
-import com.work.rest.project.murza.exception.UserNotFoundException;
-import com.work.rest.project.murza.exception.VerificationCodeExpiredException;
-import com.work.rest.project.murza.exception.VerificationCodeNotFoundException;
+import com.work.rest.project.murza.exception.*;
 import com.work.rest.project.murza.repository.UserRepository;
 import com.work.rest.project.murza.repository.VerificationCodeRepository;
 import com.work.rest.project.murza.service.settings.EmailService;
@@ -12,9 +10,13 @@ import com.work.rest.project.murza.service.settings.SmsService;
 import com.work.rest.project.murza.service.settings.VerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.Date;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,13 +28,42 @@ public class VerificationServiceImpl implements VerificationService {
     private final EmailService emailService;
     private final SmsService smsService;
 
-    @Value("${verification-status.inspiration-code}")
+    @Value("${verification-status.expiration-code}")
     private int CODE_EXPIRATION_MINUTES;
+
+
+    @Value("${verification-status.block-duration-minutes}")
+    private int BLOCK_DURATION_MINUTES;
 
     @Override
     public void sendVerificationCode(Long userId, String type) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId.toString()));
+
+        Optional<VerificationCode> latestCodeOpt = codeRepository.findLatestCode(userId, type);
+        if (latestCodeOpt.isPresent()) {
+            VerificationCode latestCode = latestCodeOpt.get();
+            if (latestCode.getBlockedUntil() != null) {
+                if (latestCode.getBlockedUntil().after(new Date())) {
+                    throw new VerificationBlockedException("");
+                } else {
+                    latestCode.setInvalidAttempts(0);
+                    latestCode.setBlockedUntil(null);
+                    codeRepository.save(latestCode);
+                }
+            }
+        }
+
+        Optional<VerificationCode> existingCode = codeRepository.findActiveCode(userId, type);
+        if (existingCode.isPresent() && existingCode.get().getExpirationTime().after(new Date())) {
+            throw new VerificationCodeAlreadyActiveException(existingCode.toString());
+        }
+
+        Date tenMinutesAgo = new Date(System.currentTimeMillis() - 10 * 60 * 1000);
+        long recentAttempts = codeRepository.countRecentAttempts(userId, type, tenMinutesAgo);
+        if (recentAttempts >= 3) {
+            throw new VerificationBlockedException("");
+        }
 
         String code = String.valueOf((int) (Math.random() * 900000) + 100000);
         VerificationCode verificationCode = new VerificationCode();
@@ -49,8 +80,9 @@ public class VerificationServiceImpl implements VerificationService {
         }
     }
 
+
     @Override
-    public boolean verifyCode(Long userId, String code, String type) {
+    public void verifyCode(Long userId, String code, String type) {
         VerificationCode verificationCode = codeRepository.findLatestUnverifiedCodeWithinTimeframeNative(userId, type)
                 .orElseThrow(() -> new VerificationCodeNotFoundException("No valid code found"));
 
@@ -59,7 +91,19 @@ public class VerificationServiceImpl implements VerificationService {
         }
 
         if (!verificationCode.getCode().equals(code)) {
-            throw new VerificationCodeNotFoundException("Invalid verification code");
+            verificationCode.setInvalidAttempts(verificationCode.getInvalidAttempts() + 1);
+            codeRepository.save(verificationCode);
+
+            if (verificationCode.getInvalidAttempts() >= 3) {
+                verificationCode.setBlockedUntil(new Date(System.currentTimeMillis() + (long) BLOCK_DURATION_MINUTES * 60 * 1000)); // Block for 10 minutes
+                codeRepository.save(verificationCode);
+                Map<String, Object> data = new HashMap<>();
+                data.put("blockedUntil", verificationCode.getBlockedUntil());
+                throw new VerificationBlockedException(data);
+            }
+            Map<String, Object> data = new HashMap<>();
+            data.put("attemptsLeft", 3 - verificationCode.getInvalidAttempts());
+            throw new VerificationCodeNotFoundException("Invalid verification code", data);
         }
 
         verificationCode.setVerified(true);
@@ -73,6 +117,53 @@ public class VerificationServiceImpl implements VerificationService {
         }
 
         userRepository.save(user);
-        return true;
     }
+
+    @Override
+    public Map<String, Object> getBlockStatus(Long userId) {
+        Map<String, Object> blockStatus = new HashMap<>();
+
+        for (String type : Arrays.asList("email", "phone")) {
+            Optional<VerificationCode> latestCodeOpt = codeRepository.findLatestCode(userId, type);
+            if (latestCodeOpt.isPresent()) {
+                VerificationCode latestCode = latestCodeOpt.get();
+                boolean isBlocked = latestCode.getBlockedUntil() != null && latestCode.getBlockedUntil().after(new Date());
+                Date blockedUntil = isBlocked ? latestCode.getBlockedUntil() : null;
+
+                Map<String, Object> statusMap = new HashMap<>();
+                statusMap.put("isBlocked", isBlocked);
+                statusMap.put("blockedUntil", blockedUntil);
+
+                blockStatus.put(type, statusMap);
+            } else {
+                Map<String, Object> statusMap = new HashMap<>();
+                statusMap.put("isBlocked", false);
+                statusMap.put("blockedUntil", null);
+
+                blockStatus.put(type, statusMap);
+            }
+        }
+
+        return blockStatus;
+    }
+
+    @Override
+    public void verifyCaptcha(String captchaResponse) {
+        String secretKey = "ВАШ_СЕКРЕТНЫЙ_КЛЮЧ_RECAPTCHA";
+        String url = "https://www.google.com/recaptcha/api/siteverify";
+
+        RestTemplate restTemplate = new RestTemplate();
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("secret", secretKey);
+        params.add("response", captchaResponse);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(url, params, Map.class);
+        Map<String, Object> body = response.getBody();
+
+        if (body == null || !(Boolean) body.get("success")) {
+            throw new CaptchaVerificationException("Invalid Captcha");
+        }
+    }
+
+
 }

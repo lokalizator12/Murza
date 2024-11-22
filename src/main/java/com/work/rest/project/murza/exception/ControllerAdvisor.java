@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.security.SignatureException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -66,11 +67,52 @@ public class ControllerAdvisor {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "Parcel not found", List.of(errorDetail));
     }
 
+
     @ExceptionHandler(VerificationCodeNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleVerificationCodeNotFoundException(VerificationCodeNotFoundException ex) {
         log.warn(ex.getMessage());
-        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("VerificationCodeId", ex.getMessage());
-        return buildErrorResponse(HttpStatus.NOT_FOUND, "Verification code error", List.of(errorDetail));
+
+        Map<String, Object> additionalData = ex.getAdditionalData();
+
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("VerificationCode", ex.getMessage());
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Verification code error",
+                List.of(errorDetail),
+                additionalData
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+
+    }
+
+    @ExceptionHandler(VerificationBlockedException.class)
+    public ResponseEntity<ApiErrorResponse> handleVerificationBlockedException(VerificationBlockedException ex) {
+        log.warn(ex.getMessage());
+        Map<String, Object> additionalData = ex.getAdditionalData();
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("Verification Blocked Exception ", ex.getMessage());
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Too many verification attempts. Please try again later",
+                List.of(errorDetail),
+                additionalData
+        );
+        return ResponseEntity.status(HttpStatus.LOCKED).body(response);
+    }
+
+
+    @ExceptionHandler(CaptchaVerificationException.class)
+    public ResponseEntity<ApiErrorResponse> handleCaptchaVerificationException(CaptchaVerificationException ex) {
+        log.warn(ex.getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("Captcha Verification Exception ", ex.getMessage());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), List.of(errorDetail));
+    }
+
+    @ExceptionHandler(VerificationCodeAlreadyActiveException.class)
+    public ResponseEntity<ApiErrorResponse> handleVerificationCodeAlreadyActiveException(VerificationCodeAlreadyActiveException ex) {
+        log.warn(ex.getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("Verification Code Already Active Exception ", ex.getMessage());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Verification Code Already Active", List.of(errorDetail));
     }
 
     @ExceptionHandler(SmsSendingException.class)
@@ -80,6 +122,7 @@ public class ControllerAdvisor {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "Sms Sending Exception", List.of(errorDetail));
     }
 
+    @ExceptionHandler(EmailSendingException.class)
     public ResponseEntity<ApiErrorResponse> handleEmailSendingException(EmailSendingException ex) {
         log.warn(ex.getMessage());
         ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("Email Sending Exception ", ex.getMessage());

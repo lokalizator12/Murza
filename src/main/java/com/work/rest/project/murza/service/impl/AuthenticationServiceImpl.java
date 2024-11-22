@@ -96,6 +96,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Cookie refreshCookie = new Cookie("refresh-token", null);
         refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true); //TODO DELETE THIS LINE WHEN PROJECT WAS DEPLOY TO HOST!!!!!! HTTP
         refreshCookie.setPath("/api/auth/refresh");
         refreshCookie.setMaxAge(0);
         response.addCookie(refreshCookie);

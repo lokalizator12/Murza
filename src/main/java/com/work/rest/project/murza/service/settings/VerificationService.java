@@ -1,7 +1,14 @@
 package com.work.rest.project.murza.service.settings;
 
+import java.util.Map;
+
 public interface VerificationService {
 
-    public void sendVerificationCode(Long userId, String type);
-    public boolean verifyCode(Long userId, String code, String type);
+    void sendVerificationCode(Long userId, String type);
+
+    void verifyCode(Long userId, String code, String type);
+
+    Map<String, Object> getBlockStatus(Long id);
+
+    void verifyCaptcha(String captchaResponse);
 }
