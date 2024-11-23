@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +21,13 @@ public interface ParcelRequestService {
 
     List<ParcelRequestMapDTO> getAllParcelRequestsForMap();
 
-    Page<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary(int page, int size);
+    Page<ParcelRequestMiniSummaryDTO> getAllParcelRequestsWithMiniSummary(
+            int page, int size,
+            String pickupAddress, String deliveryAddress,
+            LocalDate dateFrom, LocalDate dateTo,
+            Double priceMin, Double priceMax,
+            String sortBy, String sortDirection
+    );
 
     ParcelRequest getParcelRequestById(UUID id);
 

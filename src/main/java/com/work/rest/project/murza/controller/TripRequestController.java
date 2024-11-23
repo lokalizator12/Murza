@@ -10,10 +10,12 @@ import com.work.rest.project.murza.service.request.TripRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -42,11 +44,21 @@ public class TripRequestController {
     @GetMapping("/list-summary")
     public ResponseEntity<Page<TripRequestMiniSummaryDTO>> getAllTripRequestsWithSummary(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size
+            @RequestParam(defaultValue = "7") int size,
+            @RequestParam(required = false) String departureAddress,
+            @RequestParam(required = false) String destinationAddress,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection
     ) {
-        log.info("Getting trip requests with summary");
-        return ResponseEntity.ok(tripRequestService.getAllTripRequestsWithSummary(page, size));
+        log.info("Received parameters: departureAddress={}, destinationAddress={}", departureAddress, destinationAddress);
+        log.info("Getting trip requests with filters and sorting");
+        Page<TripRequestMiniSummaryDTO> result = tripRequestService.getAllTripRequestsWithSummary(
+                page, size, departureAddress, destinationAddress, dateFrom, dateTo, sortBy, sortDirection);
+        return ResponseEntity.ok(result);
     }
+
 
     @GetMapping("/list-map")
     public ResponseEntity<List<TripRequestMapDTO>> getAllTripRequestsForMap() {

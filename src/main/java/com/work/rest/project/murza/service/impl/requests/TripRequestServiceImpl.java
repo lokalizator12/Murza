@@ -20,13 +20,17 @@ import com.work.rest.project.murza.repository.TripRequestRepository;
 import com.work.rest.project.murza.repository.UserRepository;
 import com.work.rest.project.murza.service.UserService;
 import com.work.rest.project.murza.service.request.TripRequestService;
+import com.work.rest.project.murza.util.filters.TripRequestSpecifications;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -92,12 +96,47 @@ public class TripRequestServiceImpl implements TripRequestService {
                 .toList();
     }
 
+    // TripRequestServiceImpl.java
+
     @Override
-    public Page<TripRequestMiniSummaryDTO> getAllTripRequestsWithSummary(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return tripRequestRepository.findAllByIsRealized(false, pageable)
+    public Page<TripRequestMiniSummaryDTO> getAllTripRequestsWithSummary(
+            int page, int size,
+            String departureAddress, String destinationAddress,
+            LocalDate dateFrom, LocalDate dateTo,
+            String sortBy, String sortDirection
+    ) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "departureDate"); // Сортировка по умолчанию
+        if (sortBy != null && !sortBy.isEmpty() && sortDirection != null && !sortDirection.isEmpty()) {
+            try {
+                Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+                sort = Sort.by(direction, sortBy);
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid sort direction '{}', defaulting to ASC", sortDirection);
+                sort = Sort.by(Sort.Direction.ASC, sortBy);
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<TripRequest> spec = Specification.where(TripRequestSpecifications.isNotRealized());
+
+        if (departureAddress != null && !departureAddress.isEmpty()) {
+            spec = spec.and(TripRequestSpecifications.hasDepartureAddress(departureAddress));
+        }
+        if (destinationAddress != null && !destinationAddress.isEmpty()) {
+            spec = spec.and(TripRequestSpecifications.hasDestinationAddress(destinationAddress));
+        }
+        if (dateFrom != null) {
+            spec = spec.and(TripRequestSpecifications.hasDepartureDateAfter(dateFrom));
+        }
+        if (dateTo != null) {
+            spec = spec.and(TripRequestSpecifications.hasDepartureDateBefore(dateTo));
+        }
+
+        return tripRequestRepository.findAll(spec, pageable)
                 .map(TripMapper::tripRequestToTripRequestMiniSummaryDto);
     }
+
 
     @Override
     public TripRequest getTripRequestById(Long id) {

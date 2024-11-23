@@ -5,6 +5,7 @@ import com.work.rest.project.murza.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ParcelRequestRepository extends JpaRepository<ParcelRequest, UUID> {
+public interface ParcelRequestRepository extends JpaRepository<ParcelRequest, UUID>, JpaSpecificationExecutor<ParcelRequest> {
 
 
     Page<ParcelRequest> findAllByIsRealized(Boolean realized, Pageable pageable);

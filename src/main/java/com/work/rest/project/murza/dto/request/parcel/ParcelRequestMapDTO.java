@@ -17,5 +17,6 @@ public class ParcelRequestMapDTO {
     private double pickupLongitude;
     private double deliveryLatitude;
     private double deliveryLongitude;
-
+    private String departureAddress;
+    private String destinationAddress;
 }

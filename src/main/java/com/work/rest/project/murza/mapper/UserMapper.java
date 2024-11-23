@@ -4,19 +4,23 @@ import com.work.rest.project.murza.dto.profile.UserProfileDto;
 import com.work.rest.project.murza.dto.profile.UserSettingsDto;
 import com.work.rest.project.murza.dto.profile.UserSubscribeDto;
 import com.work.rest.project.murza.entity.User;
+import com.work.rest.project.murza.repository.SubscriptionRepository;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Date;
 
 public class UserMapper {
 
+
     public static UserProfileDto toUserProfileDto(User user) {
-        //TODO AVERAGE RATING, FOLLOWERS COUNT, LAST ACTIVITY
+        //TODO AVERAGE RATING, LAST ACTIVITY
         return UserProfileDto.builder()
                 .id(user.getId())
                 .userPhoto(user.getUserPhoto())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .verificationStatus(user.isVerificationStatusEmail() || user.isVerificationStatusPhone())
+                .emailVerified(user.isVerificationStatusEmail())
+                .phoneVerified(user.isVerificationStatusPhone())
                 .averageRating(5f)
                 .dateRegistered(user.getRegisteredAt())
                 .followersCount(99)

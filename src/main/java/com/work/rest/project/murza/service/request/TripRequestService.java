@@ -9,6 +9,7 @@ import com.work.rest.project.murza.entity.Requests.TripRequest;
 import org.springframework.data.domain.Page;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TripRequestService {
@@ -20,7 +21,13 @@ public interface TripRequestService {
 
     List<TripRequestMapDTO> getAllTripRequestsForMap();
 
-    Page<TripRequestMiniSummaryDTO> getAllTripRequestsWithSummary(int page, int size);
+    public Page<TripRequestMiniSummaryDTO> getAllTripRequestsWithSummary(
+            int page, int size,
+            String departureAddress, String destinationAddress,
+            LocalDate dateFrom, LocalDate dateTo,
+            String sortBy, String sortDirection
+    );
+
 
     TripRequest getTripRequestById(Long id);
 

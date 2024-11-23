@@ -61,6 +61,8 @@ public class ParcelMapper {
         dto.setDeliveryLongitude(parcelRequest.getDeliveryLongitude());
         dto.setPickupLatitude(parcelRequest.getPickupLatitude());
         dto.setPickupLongitude(parcelRequest.getPickupLongitude());
+        dto.setDepartureAddress(parcelRequest.getPickupAddress());
+        dto.setDestinationAddress(parcelRequest.getDeliveryAddress());
         return dto;
     }
 

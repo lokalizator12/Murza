@@ -10,12 +10,15 @@ import com.work.rest.project.murza.service.request.ParcelRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,14 +55,25 @@ public class ParcelRequestController {
         return ResponseEntity.ok(parcelRequestService.getAllParcelRequestsForMap());
     }
 
-    @GetMapping(value = "/list-summary")
+    @GetMapping("/list-summary")
     public ResponseEntity<Page<ParcelRequestMiniSummaryDTO>> getAllParcelRequestsSummary(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size
+            @RequestParam(defaultValue = "7") int size,
+            @RequestParam(required = false) String pickupAddress,
+            @RequestParam(required = false) String deliveryAddress,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+            @RequestParam(required = false) Double priceMin,
+            @RequestParam(required = false) Double priceMax,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection
     ) {
-        log.info("Get all parcels summary");
-        return ResponseEntity.ok(parcelRequestService.getAllParcelRequestsWithMiniSummary(page, size));
+        log.info("Get all parcels summary with filters and sorting");
+        Page<ParcelRequestMiniSummaryDTO> result = parcelRequestService.getAllParcelRequestsWithMiniSummary(
+                page, size, pickupAddress, deliveryAddress, dateFrom, dateTo, priceMin, priceMax, sortBy, sortDirection);
+        return ResponseEntity.ok(result);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ParcelRequest> getParcelRequestById(@PathVariable UUID id) {
