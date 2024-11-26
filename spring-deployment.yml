@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: murza-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: murza-app
+  template:
+    metadata:
+      labels:
+        app: murza-app
+    spec:
+      containers:
+        - name: murza-app
+          image: lokalizator12/murza-app:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: murza-config
+            - secretRef:
+                 name: murza-secret

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: murza-config
+data:
+  MYSQL_DATABASE_URL_DOCKER: jdbc:mysql://mysql-db:3306/murza_db
+  MYSQL_USER: AF
+  MAIL_SENDER_HOST: smtp.gmail.com
+  AWS_REGION: eu-north-1
+  S3_BUCKET_NAME: murza-picture-store
+  REDIS_HOST: localhost
+  MYSQL_DATABASE: engine
