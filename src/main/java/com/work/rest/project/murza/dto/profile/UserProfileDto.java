@@ -14,6 +14,7 @@ public class UserProfileDto {
     private String userPhoto;
     private Date lastActivityDate;
     private Date dateRegistered;
+    private boolean isOnline;
     private int followersCount;
     private boolean phoneVerified;
     private boolean emailVerified;

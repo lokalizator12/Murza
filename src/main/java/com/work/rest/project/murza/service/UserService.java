@@ -36,4 +36,6 @@ public interface UserService {
     User getUserById(Long userId);
 
     UserSettingsDto getUserSettings(Long id);
+
+    void updateLastSeen(String username);
 }

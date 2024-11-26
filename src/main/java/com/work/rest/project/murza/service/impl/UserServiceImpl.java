@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -168,5 +169,12 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException(id.toString()));
 
         return UserMapper.toUserSettingsDto(user);
+    }
+
+    @Override
+    public void updateLastSeen(String username) {
+        User user = userRepository.findByEmail(username).orElseThrow(() -> new UserNotFoundException(username));
+        user.setLastSeen(new Date());
+        userRepository.save(user);
     }
 }

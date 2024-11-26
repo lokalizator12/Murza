@@ -3,6 +3,7 @@ package com.work.rest.project.murza.controller.profile;
 import com.work.rest.project.murza.dto.profile.UserSettingsDto;
 import com.work.rest.project.murza.dto.profile.UserSettingsUpdateDto;
 import com.work.rest.project.murza.entity.User;
+import com.work.rest.project.murza.repository.UserRepository;
 import com.work.rest.project.murza.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @CrossOrigin
@@ -35,4 +40,21 @@ public class UserController {
         return ResponseEntity.ok(userSettingsDto);
     }
 
+    private final UserRepository userRepository;
+
+    @PostMapping("/updateLastSeen")
+    public ResponseEntity<Void> updateLastSeen(Principal principal) {
+        String username = principal.getName();
+        userService.updateLastSeen(username);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/contacts")
+    public ResponseEntity<List<User>> getContacts(@AuthenticationPrincipal User currentUser) {
+        // Return all users except the current user
+        List<User> users = userRepository.findAll().stream()
+                .filter(user -> !user.getId().equals(currentUser.getId()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(users);
+    }
 }

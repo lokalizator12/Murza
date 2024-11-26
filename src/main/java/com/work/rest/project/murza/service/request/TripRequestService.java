@@ -21,7 +21,7 @@ public interface TripRequestService {
 
     List<TripRequestMapDTO> getAllTripRequestsForMap();
 
-    public Page<TripRequestMiniSummaryDTO> getAllTripRequestsWithSummary(
+    Page<TripRequestMiniSummaryDTO> getAllTripRequestsWithSummary(
             int page, int size,
             String departureAddress, String destinationAddress,
             LocalDate dateFrom, LocalDate dateTo,

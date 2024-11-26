@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,6 +15,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+@ToString
 @Getter
 @Setter
 @Table(name = "User")
@@ -57,7 +59,9 @@ public class User implements UserDetails {
 
     @UpdateTimestamp
     private Date updatedAt;
+    private boolean online;
 
+    private Date lastSeen;
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;

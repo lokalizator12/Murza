@@ -9,8 +9,14 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:3000")
+                .allowedOrigins("http://localhost:3000", "http://localhost:3001")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("*")
+                .allowCredentials(true);
+
+        registry.addMapping("/ws/**")  // Добавляем разрешение для WebSocket
+                .allowedOrigins("http://localhost:3000", "http://localhost:3001")
+                .allowedMethods("GET", "POST")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }

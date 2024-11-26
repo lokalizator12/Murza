@@ -1,5 +1,6 @@
 package com.work.rest.project.murza.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,6 +32,7 @@ public class Message {
     @Column(nullable = false)
     private String content;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 

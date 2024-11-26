@@ -3,8 +3,11 @@ package com.work.rest.project.murza.controller;
 import com.work.rest.project.murza.dto.auth.AuthenticateResponseDto;
 import com.work.rest.project.murza.dto.auth.LoginUserDto;
 import com.work.rest.project.murza.dto.auth.RegisterUserDto;
+import com.work.rest.project.murza.dto.profile.UserProfileDto;
 import com.work.rest.project.murza.entity.User;
+import com.work.rest.project.murza.mapper.UserMapper;
 import com.work.rest.project.murza.service.AuthenticationService;
+import com.work.rest.project.murza.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -12,10 +15,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.*;
 
 
 @Slf4j
@@ -24,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
-
+    private final UserService userService;
 
     @PostMapping("/signup")
     private ResponseEntity<User> registration(@Valid @RequestBody RegisterUserDto registerUserDto) {
@@ -70,5 +73,12 @@ public class AuthenticationController {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileDto> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        UserProfileDto user = userService.getUserByEmail(userDetails.getUsername())
+                .map(UserMapper::toUserProfileDto)
+                .orElseThrow(() -> new UsernameNotFoundException(userDetails.getUsername()));
+        return ResponseEntity.ok(user);
+    }
 
 }
