@@ -1,3 +1,4 @@
+// ChatController.java
 package com.work.rest.project.murza.controller;
 
 import com.work.rest.project.murza.dto.MessageRequest;
@@ -9,12 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Controller
@@ -41,7 +41,7 @@ public class ChatController {
             return;
         }
 
-        // Get receiver
+        log.info("Sender: {}", sender);
         User receiver = userRepository.findById(chatMessage.getReceiverId()).orElse(null);
         if (receiver == null) {
             log.error("Receiver not found");
@@ -49,22 +49,31 @@ public class ChatController {
         }
 
         // Save message
+        log.info("Receiver: {}", receiver);
         Message message = messageService.sendMessage(
                 sender.getId(),
                 receiver.getId(),
                 chatMessage.getContent()
         );
 
+        // Decrypt content before sending to clients
+        String decryptedContent = messageService.decryptMessageContent(message.getContent());
+        message.setContent(decryptedContent);
+
+        // Include sender and receiver details
+        message.setSenderId(sender.getId());
+        message.setReceiverId(receiver.getId());
+
         // Send message to the receiver
         messagingTemplate.convertAndSendToUser(
-                receiver.getEmail(), // Use receiver's email
+                receiver.getEmail(),
                 "/queue/messages",
                 message
         );
 
         // Send message to the sender
         messagingTemplate.convertAndSendToUser(
-                sender.getEmail(), // Use sender's email
+                sender.getEmail(),
                 "/queue/messages",
                 message
         );
@@ -75,43 +84,27 @@ public class ChatController {
         String username = principal.getName();
         User currentUser = userRepository.findByEmail(username).orElse(null);
         if (currentUser == null) {
+            log.error("Current user not found");
             return;
         }
 
-        // Mark messages as read
+        log.info("Marking messages as read for senderId: {} by userId: {}", senderId, currentUser.getId());
+
+        // Помечаем сообщения как прочитанные
         messageService.markMessagesAsRead(currentUser.getId(), senderId);
 
-        // Notify the sender that messages have been read
-        messagingTemplate.convertAndSendToUser(
-                userRepository.findById(senderId).get().getEmail(),
-                "/queue/read-receipts",
-                currentUser.getId()
-        );
-    }
-
-    @MessageMapping("/chat.typing")
-    public void typing(@Payload Map<String, Long> typingNotification, Principal principal) {
-        String username = principal.getName();
-        User sender = userRepository.findByEmail(username).orElse(null);
-        if (sender == null) {
-            return;
+        // Отправляем уведомление отправителю
+        User sender = userRepository.findById(senderId).orElse(null);
+        if (sender != null) {
+            messagingTemplate.convertAndSendToUser(
+                    sender.getEmail(),
+                    "/queue/read-receipts",
+                    currentUser.getId()
+            );
+            log.info("Read receipt sent to sender: {}", sender.getEmail());
+        } else {
+            log.error("Sender not found for senderId: {}", senderId);
         }
-
-        Long receiverId = typingNotification.get("receiverId");
-        User receiver = userRepository.findById(receiverId).orElse(null);
-        if (receiver == null) {
-            return;
-        }
-
-        Map<String, Long> notification = new HashMap<>();
-        notification.put("senderId", sender.getId());
-
-        messagingTemplate.convertAndSendToUser(
-                receiver.getEmail(),
-                "/queue/typing",
-                notification
-        );
     }
-
 
 }

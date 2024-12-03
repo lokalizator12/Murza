@@ -1,3 +1,4 @@
+// MessageRequest.java
 package com.work.rest.project.murza.dto;
 
 import lombok.Data;
