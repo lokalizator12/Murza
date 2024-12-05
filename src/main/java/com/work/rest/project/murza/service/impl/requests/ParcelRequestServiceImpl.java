@@ -6,8 +6,7 @@ import com.work.rest.project.murza.dto.request.parcel.ParcelRequestMapDTO;
 import com.work.rest.project.murza.dto.request.parcel.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.User;
-import com.work.rest.project.murza.exception.ParcelNotFoundException;
-import com.work.rest.project.murza.exception.UserNotFoundException;
+import com.work.rest.project.murza.exception.*;
 import com.work.rest.project.murza.mapper.ParcelMapper;
 import com.work.rest.project.murza.repository.ParcelRequestRepository;
 import com.work.rest.project.murza.repository.UserRepository;
@@ -27,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -132,7 +132,20 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
 
     @Override
     public void deleteParcelRequest(UUID id) {
-        ParcelRequest parcelRequest = getParcelRequestById(id);
-        parcelRequestRepository.delete(parcelRequest);
+        if (!parcelRequestRepository.existsById(id)) throw new TripRequestNotFoundException(id.toString());
+        parcelRequestRepository.deleteById(id);
+        log.info("Trip request with ID {} deleted", id);
+    }
+
+    @Override
+    public void markAsRealized(UUID id) {
+        ParcelRequest parcelRequest = parcelRequestRepository.findById(id)
+                .orElseThrow(() -> new ParcelRequestNotFoundException(id.toString()));
+        if (parcelRequest.isRealized()) {
+            throw new ParcelRequestAlreadyRealizedException(id.toString());
+        }
+        parcelRequest.setRealized(true);
+        parcelRequest.setRealizedAt(new Date());
+        parcelRequestRepository.save(parcelRequest);
     }
 }

@@ -39,6 +39,8 @@ public class ParcelMapper {
                 .destination(parcelRequest.getDeliveryAddress())
                 .arrivalDate(parcelRequest.getPickupDate())
                 .departureDate(parcelRequest.getDeliveryDate())
+                .createdAt(parcelRequest.getCreatedAt())
+                .realizedAt(parcelRequest.getRealizedAt())
                 .status(parcelRequest.isRealized())
                 .idParcel(parcelRequest.getIdParcel())
                 .build();

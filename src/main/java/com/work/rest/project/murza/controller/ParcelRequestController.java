@@ -96,5 +96,11 @@ public class ParcelRequestController {
         log.info("Deleted");
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}/realize")
+    public ResponseEntity<Void> realizeTripRequest(@PathVariable UUID id) {
+        parcelRequestService.markAsRealized(id);
+        return ResponseEntity.noContent().build();
+    }
 }
 

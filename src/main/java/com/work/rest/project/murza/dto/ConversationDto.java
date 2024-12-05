@@ -12,4 +12,5 @@ public class ConversationDto {
     private String lastMessage;
     private Timestamp lastMessageTimestamp;
     private int unreadMessages;
+    private int unreadAllMessages;
 }

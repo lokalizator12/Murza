@@ -35,4 +35,5 @@ public interface ParcelRequestService {
 
     void deleteParcelRequest(UUID id);
 
+    void markAsRealized(UUID id);
 }

@@ -30,6 +30,8 @@ public class TripMapper {
                 .idTrip(tripRequest.getIdTrip())
                 .status(tripRequest.isRealized())
                 .origin(tripRequest.getDepartureAddress())
+                .createdAt(tripRequest.getCreatedAt())
+                .realizedAt(tripRequest.getRealizedAt())
                 .destination(tripRequest.getDestinationAddress())
                 .departureDate(tripRequest.getDepartureDate())
                 .arrivalDate(tripRequest.getDestinationDate())

@@ -22,5 +22,7 @@ public interface MessageRepository extends MongoRepository<Message, String> {
     @Query("SELECT m FROM Message m WHERE m.sender.id = :interlocutorId AND m.receiver.id = :currentUserId AND m.status = 'SENT'")
     List<Message> findUnreadMessages(@Param("currentUserId") Long currentUserId, @Param("interlocutorId") Long interlocutorId);
 */
-    List<Message> findByConversationIdOrderByTimestampAsc(String conversationId);
+    List<Message> findByConversationIdOrderByTimestampDesc(String conversationId);
+    Page<Message> findByConversationIdOrderByTimestampDesc(String conversationId, Pageable pageable);
+
 }

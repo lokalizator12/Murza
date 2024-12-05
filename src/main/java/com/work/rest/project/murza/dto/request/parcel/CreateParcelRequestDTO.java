@@ -1,6 +1,7 @@
 package com.work.rest.project.murza.dto.request.parcel;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.User;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.Data;
 import java.util.Date;
 import java.util.UUID;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class CreateParcelRequestDTO {
     private String description;

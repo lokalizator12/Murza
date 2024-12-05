@@ -1,5 +1,6 @@
 package com.work.rest.project.murza.dto.request.trip;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.work.rest.project.murza.entity.Requests.IntermediateLocation;
 import com.work.rest.project.murza.entity.Requests.ShippingMethod;
 import com.work.rest.project.murza.entity.Requests.TripRequest;
@@ -9,6 +10,7 @@ import lombok.Data;
 import java.util.Date;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class CreateTripRequestDTO {
     private double departureLatitude;

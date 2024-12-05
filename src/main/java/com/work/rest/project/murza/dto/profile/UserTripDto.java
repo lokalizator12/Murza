@@ -10,6 +10,8 @@ import java.util.Date;
 public class UserTripDto {
     private Long idTrip;
     private String origin;
+    private Date createdAt;
+    private Date realizedAt;
     private String destination;
     private Date departureDate;
     private Date arrivalDate;

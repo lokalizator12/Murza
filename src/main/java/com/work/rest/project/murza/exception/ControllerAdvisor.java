@@ -52,12 +52,18 @@ public class ControllerAdvisor {
         );
     }
 
-
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
         log.warn("User not found: {}", ex.getMessage());
         ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("userId", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND, "User not found", List.of(errorDetail));
+    }
+
+    @ExceptionHandler(ParcelRequestNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleParcelRequestNotFoundException(ParcelRequestNotFoundException ex) {
+        log.warn("Parcel request not found: {}", ex.getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("parcelId", ex.getMessage());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Parcel request not found", List.of(errorDetail));
     }
 
     @ExceptionHandler(ParcelNotFoundException.class)
@@ -113,6 +119,13 @@ public class ControllerAdvisor {
         log.warn(ex.getMessage());
         ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("Verification Code Already Active Exception ", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "Verification Code Already Active", List.of(errorDetail));
+    }
+
+    @ExceptionHandler(ParcelRequestAlreadyRealizedException.class)
+    public ResponseEntity<ApiErrorResponse> handleParcelRequestAlreadyRealizedException(ParcelRequestAlreadyRealizedException ex) {
+        log.warn(ex.getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("Parcel request already realized Exception ", ex.getMessage());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Parcel request already realized", List.of(errorDetail));
     }
 
     @ExceptionHandler(SmsSendingException.class)

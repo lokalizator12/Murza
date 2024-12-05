@@ -40,14 +40,13 @@ public class ConversationServiceImpl implements ConversationService {
                 currentUser.getId(), currentUser.getId());
 
         List<ConversationDto> conversationDtos = new ArrayList<>();
-
         for (Conversation conversation : conversations) {
             String conversationId = conversation.getId();
             log.info(conversationId);
-            List<Message> messages = messageRepository.findByConversationIdOrderByTimestampAsc(conversationId);
+            List<Message> messages = messageRepository.findByConversationIdOrderByTimestampDesc(conversationId);
             log.info(messages.toString());
             if (!messages.isEmpty()) {
-                Message lastMessage = messages.get(messages.size() - 1);
+                Message lastMessage = messages.get(0);
                 log.info(lastMessage.toString());
                 log.info(lastMessage.getContent());
                 String decryptedContent = encryptionService.decrypt(lastMessage.getContent());
@@ -68,7 +67,6 @@ public class ConversationServiceImpl implements ConversationService {
                     int unreadMessages = (int) messages.stream()
                             .filter(msg -> msg.getReceiverId().equals(currentUser.getId()) && msg.getStatus() == MessageStatus.SENT)
                             .count();
-
                     dto.setUnreadMessages(unreadMessages);
                     conversationDtos.add(dto);
                 }

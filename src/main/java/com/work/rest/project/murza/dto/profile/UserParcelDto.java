@@ -17,4 +17,6 @@ public class UserParcelDto {
     private Date departureDate;
     private Date arrivalDate;
     private Boolean status;
+    private Date createdAt;
+    private Date realizedAt;
 }

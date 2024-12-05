@@ -25,19 +25,34 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(
             ServerHttpRequest request, ServerHttpResponse response,
-            WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+            WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
-        String token = request.getURI().getQuery().split("=")[1];
+        String query = request.getURI().getQuery();
+        if (query == null || !query.contains("=")) {
+            log.error("Invalid query string in WebSocket request");
+            return false;
+        }
+
+        String[] parts = query.split("=");
+        if (parts.length < 2) {
+            log.error("Unable to extract token from query string");
+            return false;
+        }
+
+        String token = parts[1];
         String username = jwtService.extractUsername(token);
-        log.info("username{}", username);
+        log.info("Extracted username: {}", username);
+
         User user = userRepository.findByEmail(username).orElse(null);
-        log.info("user{}", user);
         if (user != null) {
             attributes.put("username", user.getEmail());
             return true;
         }
+
+        log.error("User not found for username: {}", username);
         return false;
     }
+
 
     @Override
     public void afterHandshake(

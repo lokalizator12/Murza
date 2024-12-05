@@ -22,10 +22,12 @@ public class PresenceChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+            if (accessor.getUser() == null) {
+                throw new IllegalStateException("User is not authenticated for WebSocket connection.");
+            }
             String username = accessor.getUser().getName();
             User user = userRepository.findByEmail(username).orElse(null);
             if (user != null) {
@@ -33,6 +35,9 @@ public class PresenceChannelInterceptor implements ChannelInterceptor {
                 userRepository.save(user);
             }
         } else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+            if (accessor.getUser() == null) {
+                return message;
+            }
             String username = accessor.getUser().getName();
             User user = userRepository.findByEmail(username).orElse(null);
             if (user != null) {
@@ -44,4 +49,5 @@ public class PresenceChannelInterceptor implements ChannelInterceptor {
 
         return message;
     }
+
 }

@@ -6,6 +6,8 @@ import com.work.rest.project.murza.entity.Message;
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.repository.UserRepository;
 import com.work.rest.project.murza.service.MessageService;
+import com.work.rest.project.murza.service.UserService;
+import com.work.rest.project.murza.service.utils.CaptchaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,6 +26,7 @@ public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageService messageService;
     private final UserRepository userRepository;
+    private final CaptchaService captchaService;
 
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload MessageRequest chatMessage, Principal principal) {
@@ -34,6 +37,11 @@ public class ChatController {
         String username = principal.getName();
         log.info("Principal: {}", username);
 
+        boolean isHuman = captchaService.validateCaptcha(chatMessage.getCaptchaToken());
+        if (!isHuman) {
+            log.error("reCAPTCHA validation failed");
+            return;
+        }
         // Get sender
         User sender = userRepository.findByEmail(username).orElse(null);
         if (sender == null) {
@@ -81,19 +89,21 @@ public class ChatController {
 
     @MessageMapping("/chat.readReceipt")
     public void readReceipt(@Payload Long senderId, Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            log.error("Principal is null or unauthenticated");
+            return;
+        }
+
         String username = principal.getName();
         User currentUser = userRepository.findByEmail(username).orElse(null);
         if (currentUser == null) {
-            log.error("Current user not found");
+            log.error("Current user not found for username: {}", username);
             return;
         }
 
         log.info("Marking messages as read for senderId: {} by userId: {}", senderId, currentUser.getId());
-
-        // Помечаем сообщения как прочитанные
         messageService.markMessagesAsRead(currentUser.getId(), senderId);
 
-        // Отправляем уведомление отправителю
         User sender = userRepository.findById(senderId).orElse(null);
         if (sender != null) {
             messagingTemplate.convertAndSendToUser(
@@ -101,10 +111,10 @@ public class ChatController {
                     "/queue/read-receipts",
                     currentUser.getId()
             );
-            log.info("Read receipt sent to sender: {}", sender.getEmail());
         } else {
             log.error("Sender not found for senderId: {}", senderId);
         }
     }
+
 
 }

@@ -7,4 +7,5 @@ import lombok.Data;
 public class MessageRequest {
     private Long receiverId;
     private String content;
+    private String captchaToken;
 }

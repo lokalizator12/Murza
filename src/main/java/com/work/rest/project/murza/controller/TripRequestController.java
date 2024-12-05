@@ -76,7 +76,7 @@ public class TripRequestController {
     public ResponseEntity<Page<UserTripDto>> getTripRequestByUser(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(defaultValue = "3") int size) {
         log.info("Getting trip requests for user with id:{}", userId);
         return ResponseEntity.ok(tripRequestService.findByDriver(userId, page, size));
     }
@@ -92,6 +92,12 @@ public class TripRequestController {
     public ResponseEntity<Void> updateTripRequest(@RequestBody UpdateTripRequestDTO dto) {
 
         tripRequestService.updateTripRequest(dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/realize")
+    public ResponseEntity<Void> realizeTripRequest(@PathVariable Long id) {
+        tripRequestService.markAsRealized(id);
         return ResponseEntity.noContent().build();
     }
 }

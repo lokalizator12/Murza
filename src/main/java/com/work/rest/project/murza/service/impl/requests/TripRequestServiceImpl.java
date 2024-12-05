@@ -31,6 +31,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -141,14 +142,12 @@ public class TripRequestServiceImpl implements TripRequestService {
     @Override
     public TripRequest getTripRequestById(Long id) {
         return tripRequestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Trip request with ID " + id + " not found."));
+                .orElseThrow(() -> new TripRequestNotFoundException(id.toString()));
     }
 
     @Override
     public void deleteTripRequest(Long id) {
-        if (!tripRequestRepository.existsById(id)) {
-            throw new IllegalArgumentException("Trip request with ID " + id + " not found.");
-        }
+        if (!tripRequestRepository.existsById(id)) throw new TripRequestNotFoundException(id.toString());
         tripRequestRepository.deleteById(id);
         log.info("Trip request with ID {} deleted", id);
     }
@@ -158,7 +157,18 @@ public class TripRequestServiceImpl implements TripRequestService {
         TripRequest existingTripRequest = tripRequestRepository.findById(dto.getTripId())
                 .orElseThrow(() -> new TripRequestNotFoundException(dto.getTripId().toString()));
         log.info("Update Trip request with id: {}", dto.getTripId());
-
         tripRequestRepository.save(existingTripRequest);
+    }
+
+    @Override
+    public void markAsRealized(Long id) {
+        TripRequest tripRequest = tripRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Trip request not found"));
+        if (tripRequest.isRealized()) {
+            throw new IllegalStateException("Trip request is already realized");
+        }
+        tripRequest.setRealized(true);
+        tripRequest.setRealizedAt(new Date());
+        tripRequestRepository.save(tripRequest);
     }
 }

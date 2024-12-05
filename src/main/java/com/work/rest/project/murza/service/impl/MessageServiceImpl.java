@@ -66,41 +66,22 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Page<Message> getMessageHistory(Long userId1, Long userId2, Pageable pageable) {
-        // Ищем разговор между пользователями
         Optional<Conversation> conversationOpt = conversationRepository.findByUsers(userId1, userId2);
 
         if (conversationOpt.isPresent()) {
             String conversationId = conversationOpt.get().getId();
+            Page<Message> messagePage = messageRepository.findByConversationIdOrderByTimestampDesc(conversationId, pageable);
 
-            // Получаем все сообщения, упорядоченные по времени
-            List<Message> messages = messageRepository.findByConversationIdOrderByTimestampAsc(conversationId);
-
-            // Расшифровываем сообщения
-            List<Message> decryptedMessages = messages.stream()
+            List<Message> decryptedMessages = messagePage.getContent().stream()
                     .map(msg -> {
-                        String decryptedContent = encryptionService.decrypt(msg.getContent());
-                        msg.setContent(decryptedContent);
+                        msg.setContent(encryptionService.decrypt(msg.getContent()));
                         return msg;
                     })
                     .collect(Collectors.toList());
 
-            int totalMessages = decryptedMessages.size();
-
-            // Рассчитываем start и end индексы для текущей страницы
-            int start = (int) pageable.getOffset();
-            int end = Math.min(start + pageable.getPageSize(), totalMessages);
-
-            // Проверяем индексы
-            if (start > totalMessages) {
-                return Page.empty(pageable);
-            }
-
-            List<Message> pageContent = decryptedMessages.subList(start, end);
-
-            // Возвращаем страницу
-            return new PageImpl<>(pageContent, pageable, totalMessages);
+            return new PageImpl<>(decryptedMessages, pageable, messagePage.getTotalElements());
         } else {
-            return Page.empty();
+            return Page.empty(pageable);
         }
     }
 
@@ -111,7 +92,7 @@ public class MessageServiceImpl implements MessageService {
 
         if (conversationOpt.isPresent()) {
             String conversationId = conversationOpt.get().getId();
-            List<Message> messages = messageRepository.findByConversationIdOrderByTimestampAsc(conversationId);
+            List<Message> messages = messageRepository.findByConversationIdOrderByTimestampDesc(conversationId);
             for (Message message : messages) {
                 if (message.getReceiverId().equals(userId) && message.getStatus() != MessageStatus.READ) {
                     message.setStatus(MessageStatus.READ);

@@ -34,4 +34,6 @@ public interface TripRequestService {
     void deleteTripRequest(Long id);
 
     void updateTripRequest(UpdateTripRequestDTO dto);
+
+    void markAsRealized(Long id);
 }
