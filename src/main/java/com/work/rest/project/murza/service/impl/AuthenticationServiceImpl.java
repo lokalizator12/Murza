@@ -1,16 +1,20 @@
 package com.work.rest.project.murza.service.impl;
 
-import com.work.rest.project.murza.dto.auth.AuthenticateResponseDto;
-import com.work.rest.project.murza.dto.auth.LoginUserDto;
-import com.work.rest.project.murza.dto.auth.RegisterUserDto;
+import com.work.rest.project.murza.dto.auth.*;
 import com.work.rest.project.murza.entity.RoleEnum;
 import com.work.rest.project.murza.entity.User;
+import com.work.rest.project.murza.entity.VerificationCode;
+import com.work.rest.project.murza.exception.UserNotFoundException;
 import com.work.rest.project.murza.repository.RoleRepository;
 import com.work.rest.project.murza.repository.UserRepository;
+import com.work.rest.project.murza.repository.VerificationCodeRepository;
 import com.work.rest.project.murza.service.AuthenticationService;
 import com.work.rest.project.murza.service.BlacklistJwtService;
 import com.work.rest.project.murza.service.UserDetailsService;
 import com.work.rest.project.murza.service.security.JwtService;
+import com.work.rest.project.murza.service.settings.EmailService;
+import com.work.rest.project.murza.service.settings.VerificationService;
+import com.work.rest.project.murza.service.utils.TinyUrlService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,10 +36,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final VerificationCodeRepository verificationCodeRepository;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
     private final BlacklistJwtService blacklistService;
+    private final VerificationService verificationService;
+    private final TinyUrlService tinyUrlService;
+    private final EmailService emailService;
 
     @Override
     public User signUp(@Valid RegisterUserDto userDto) {
@@ -75,6 +83,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         User savedUser = userRepository.save(user);
+        verificationService.sendActivationLink(savedUser);
         log.info("User registered successfully with email: {}", userDto.getEmail());
         return savedUser;
     }
@@ -156,4 +165,33 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         return null;
     }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequest request) {
+        Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
+        if (userOptional.isEmpty()) {
+            throw new UserNotFoundException(request.getEmail());
+        }
+        User user = userOptional.get();
+        VerificationCode token = verificationService.generateVerificationCode(user, "email");
+        String resetLink = String.format("http://localhost:3000/reset-password?token=%s", token.getCode());
+        String shortLink = tinyUrlService.shortenUrl(resetLink);
+        emailService.sendEmail(user.getEmail(), "Reset password", "Your link for reset password: " + shortLink);
+        verificationCodeRepository.save(token);
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordRequest request) {
+        String code = request.getToken();
+        if (!verificationService.isCodeValid(code)) {
+            log.error("Code is not valid");
+        }
+        Long userId = verificationCodeRepository.findUserIdByCode(code).orElse(null);
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        verificationService.setCodeInvalid(code);
+    }
+
 }

@@ -8,23 +8,23 @@ import com.work.rest.project.murza.repository.VerificationCodeRepository;
 import com.work.rest.project.murza.service.settings.EmailService;
 import com.work.rest.project.murza.service.settings.SmsService;
 import com.work.rest.project.murza.service.settings.VerificationService;
+import com.work.rest.project.murza.service.utils.TinyUrlService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VerificationServiceImpl implements VerificationService {
 
     private final VerificationCodeRepository codeRepository;
     private final UserRepository userRepository;
-
+    private final TinyUrlService tinyUrlService;
     private final EmailService emailService;
     private final SmsService smsService;
 
@@ -65,19 +65,63 @@ public class VerificationServiceImpl implements VerificationService {
             throw new VerificationBlockedException("");
         }
 
-        String code = String.valueOf((int) (Math.random() * 900000) + 100000);
-        VerificationCode verificationCode = new VerificationCode();
-        verificationCode.setCode(code);
-        verificationCode.setType(type);
-        verificationCode.setUser(user);
-        verificationCode.setExpirationTime(new Date(System.currentTimeMillis() + (long) CODE_EXPIRATION_MINUTES * 60 * 1000));
+        VerificationCode verificationCode = generateVerificationCode(user, type);
         codeRepository.save(verificationCode);
 
         if ("email".equalsIgnoreCase(type)) {
-            emailService.sendVerificationEmail(user.getEmail(), code);
+            emailService.sendVerificationEmail(user.getEmail(), verificationCode.getCode());
         } else if ("phone".equalsIgnoreCase(type)) {
-            smsService.sendVerificationSms(user.getPhoneNumber(), code);
+            smsService.sendVerificationSms(user.getPhoneNumber(), verificationCode.getCode());
         }
+    }
+
+    @Override
+    public VerificationCode generateVerificationCode(User user, String type) {
+        String code = String.valueOf((int) (Math.random() * 900000) + 100000);
+        return VerificationCode.builder()
+                .code(code)
+                .expirationTime(new Date(System.currentTimeMillis() + (long) CODE_EXPIRATION_MINUTES * 60 * 1000))
+                .type(type)
+                .user(user)
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public void sendActivationLink(User user) {
+        String token = UUID.randomUUID().toString();
+
+        VerificationCode verificationCode = generateVerificationCode(user, "email");
+        verificationCode.setVerified(false);
+
+        codeRepository.save(verificationCode);
+
+        String activationLink = "http://localhost:3000/activate?token=" + token;
+        String shortLink = tinyUrlService.shortenUrl(activationLink);
+        emailService.sendVerificationEmail(user.getEmail(), shortLink);
+    }
+
+    @Override
+    public Boolean activateAccount(String token) {
+        VerificationCode verificationCode = codeRepository.findByCodeAndType(token, "email")
+                .orElseThrow(() -> new VerificationCodeNotFoundException("Invalid or expired activation token"));
+        if (verificationCode.getExpirationTime().before(new Date())) {
+            log.error("Activation token has expired");
+            return false;
+        }
+
+        if (verificationCode.isVerified()) {
+            log.error("Account is already activated");
+            return true;
+        }
+
+        User user = verificationCode.getUser();
+        user.setVerificationStatusEmail(true);
+        userRepository.save(user);
+
+        verificationCode.setVerified(true);
+        codeRepository.save(verificationCode);
+        return true;
     }
 
 
@@ -148,22 +192,20 @@ public class VerificationServiceImpl implements VerificationService {
     }
 
     @Override
-    public void verifyCaptcha(String captchaResponse) {
-        String secretKey = "ВАШ_СЕКРЕТНЫЙ_КЛЮЧ_RECAPTCHA";
-        String url = "https://www.google.com/recaptcha/api/siteverify";
-
-        RestTemplate restTemplate = new RestTemplate();
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("secret", secretKey);
-        params.add("response", captchaResponse);
-
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, params, Map.class);
-        Map<String, Object> body = response.getBody();
-
-        if (body == null || !(Boolean) body.get("success")) {
-            throw new CaptchaVerificationException("Invalid Captcha");
-        }
+    public boolean isCodeValid(String token) {
+        return codeRepository.findByCodeAndNotVerified(token)
+                .filter(t -> t.getExpirationTime().after(new Date()))
+                .isPresent();
     }
 
-
+    @Override
+    public void setCodeInvalid(String code) {
+        if (isCodeValid(code)) {
+            log.info("Code is valid");
+            VerificationCode verificationCode = codeRepository.findByCodeAndNotVerified(code)
+                    .orElseThrow(() -> new VerificationCodeNotFoundException("Invalid verification code" + code));
+            verificationCode.setVerified(true);
+            codeRepository.save(verificationCode);
+        }
+    }
 }

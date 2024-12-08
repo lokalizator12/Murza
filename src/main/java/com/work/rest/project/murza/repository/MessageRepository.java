@@ -3,10 +3,7 @@ package com.work.rest.project.murza.repository;
 import com.work.rest.project.murza.entity.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -23,6 +20,7 @@ public interface MessageRepository extends MongoRepository<Message, String> {
     List<Message> findUnreadMessages(@Param("currentUserId") Long currentUserId, @Param("interlocutorId") Long interlocutorId);
 */
     List<Message> findByConversationIdOrderByTimestampDesc(String conversationId);
+
     Page<Message> findByConversationIdOrderByTimestampDesc(String conversationId, Pageable pageable);
 
 }

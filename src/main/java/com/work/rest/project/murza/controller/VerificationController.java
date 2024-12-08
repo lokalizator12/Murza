@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -53,4 +54,10 @@ public class VerificationController {
         return ResponseEntity.ok(blockStatus);
     }
 
+    @GetMapping("/activate")
+    public ResponseEntity<Boolean> activateAccount(@RequestParam("token") String token) {
+        log.info("Start activate account");
+        return verificationService.activateAccount(token) ?
+                ResponseEntity.ok(true) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

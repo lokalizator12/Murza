@@ -19,7 +19,7 @@ public class RegisterUserDto {
     private String email;
 
     @NotBlank(message = "Password is mandatory")
-    @Size(min = 6, message = "Password should be at least 6 characters long")
+    @Size(min = 8, message = "Password should be at least 6 characters long")
     private String password;
 
     @NotBlank(message = "First name is mandatory")
@@ -31,7 +31,7 @@ public class RegisterUserDto {
     private String lastName;
 
     @NotBlank(message = "Phone number is mandatory")
-    @Pattern(regexp = "\\d{10}", message = "Phone number should be 10 digits")
+    @Pattern(regexp = "\\+\\d{1,15}", message = "Phone number must start with '+' and contain up to 15 digits")
     private String phoneNumber;
 
     @JsonIgnore

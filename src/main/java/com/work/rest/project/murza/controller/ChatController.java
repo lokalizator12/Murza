@@ -6,13 +6,11 @@ import com.work.rest.project.murza.entity.Message;
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.repository.UserRepository;
 import com.work.rest.project.murza.service.MessageService;
-import com.work.rest.project.murza.service.UserService;
 import com.work.rest.project.murza.service.utils.CaptchaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 

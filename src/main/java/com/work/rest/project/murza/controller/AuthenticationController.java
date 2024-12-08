@@ -1,13 +1,12 @@
 package com.work.rest.project.murza.controller;
 
-import com.work.rest.project.murza.dto.auth.AuthenticateResponseDto;
-import com.work.rest.project.murza.dto.auth.LoginUserDto;
-import com.work.rest.project.murza.dto.auth.RegisterUserDto;
+import com.work.rest.project.murza.dto.auth.*;
 import com.work.rest.project.murza.dto.profile.UserProfileDto;
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.mapper.UserMapper;
 import com.work.rest.project.murza.service.AuthenticationService;
 import com.work.rest.project.murza.service.UserService;
+import com.work.rest.project.murza.service.settings.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -28,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final UserService userService;
+    private final VerificationService verificationService;
 
     @PostMapping("/signup")
     private ResponseEntity<User> registration(@Valid @RequestBody RegisterUserDto registerUserDto) {
@@ -81,4 +81,28 @@ public class AuthenticationController {
         return ResponseEntity.ok(user);
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+        log.info("Forgot password request: {}", request);
+        authenticationService.forgotPassword(request);
+        log.info("Forgot password successful");
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        log.info("Reset password request: {}", request);
+        authenticationService.resetPassword(request);
+        log.info("Reset password successful");
+        return ResponseEntity.ok("Password successfully reset.");
+    }
+
+    @GetMapping("/validate-token")
+    public ResponseEntity<String> validateToken(@RequestParam("token") String token) {
+        if (verificationService.isCodeValid(token)) {
+            return ResponseEntity.ok("Token is valid.");
+        } else {
+            return ResponseEntity.badRequest().body("Invalid or expired token.");
+        }
+    }
 }

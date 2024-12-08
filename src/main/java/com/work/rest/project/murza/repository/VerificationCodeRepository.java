@@ -55,5 +55,14 @@ public interface VerificationCodeRepository extends JpaRepository<VerificationCo
     @Query("SELECT vc FROM VerificationCode vc WHERE vc.user.id = :userId AND vc.type = :type ORDER BY vc.createdAt DESC LIMIT 1")
     Optional<VerificationCode> findLatestCode(@Param("userId") Long userId, @Param("type") String type);
 
+    @Query("SELECT vc FROM VerificationCode vc WHERE vc.code = :token AND vc.type = :type ORDER BY vc.createdAt DESC LIMIT 1")
+    Optional<VerificationCode> findByCodeAndType(@Param("token") String token, @Param("type") String type);
+
+    @Query("SELECT vc FROM VerificationCode vc WHERE vc.code = :code AND vc.verified = false")
+    Optional<VerificationCode> findByCodeAndNotVerified(@Param("code") String code);
+
+
+    @Query("SELECT vc.user.id FROM VerificationCode vc WHERE vc.code = :verificationCode")
+    Optional<Long> findUserIdByCode(@Param("verificationCode") String verificationCode);
 }
 

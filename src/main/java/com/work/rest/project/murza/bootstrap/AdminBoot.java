@@ -13,12 +13,14 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
 @DependsOn("roleBoot")
 @RequiredArgsConstructor
 public class AdminBoot implements ApplicationListener<ContextRefreshedEvent> {
+
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final AuthenticationService authenticationService;
@@ -29,32 +31,58 @@ public class AdminBoot implements ApplicationListener<ContextRefreshedEvent> {
     @Value("${credentials.super.admin.email}")
     private String superAdminEmail;
 
+    private static final String SUPER_ADMIN_FIRST_NAME = "Super";
+    private static final String SUPER_ADMIN_LAST_NAME = "Admin";
+    private static final String SUPER_ADMIN_PHONE = "0000000000";
+
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        createSuperAdministrator();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        createSuperAdminIfNotExists();
     }
 
-    private void createSuperAdministrator() {
-        log.info("Searching for super admin");
+    private void createSuperAdminIfNotExists() {
+        log.info("Checking for existence of super admin");
 
-        Role superAdminRole = roleRepository.findByName(RoleEnum.SUPER_ADMIN)
-                .orElseThrow(() -> new IllegalArgumentException("Role not found: SUPER_ADMIN"));
+        if (!isSuperAdminConfigurationValid()) {
+            log.error("Super admin configuration is invalid. Please check email and password properties.");
+            return;
+        }
 
-        if (!userRepository.existsByRole(superAdminRole)) {
-            log.info("Initializing super admin");
+        Role superAdminRole = findSuperAdminRole();
 
-            RegisterUserDto userDto = new RegisterUserDto();
-            userDto.setFirstName("Super");
-            userDto.setLastName("Admin");
-            userDto.setPhoneNumber("0000000000");
-            userDto.setRole(RoleEnum.SUPER_ADMIN);
-            userDto.setEmail(superAdminEmail);
-            userDto.setPassword(superAdminPassword);
-
-            authenticationService.signUp(userDto);
-            log.info("Super admin created with email: {}", superAdminEmail);
-        } else {
+        if (userRepository.existsByRole(superAdminRole)) {
             log.info("Super admin already exists");
+            return;
+        }
+
+        createSuperAdmin(superAdminRole);
+    }
+
+    private boolean isSuperAdminConfigurationValid() {
+        return StringUtils.hasText(superAdminEmail) && StringUtils.hasText(superAdminPassword);
+    }
+
+    private Role findSuperAdminRole() {
+        return roleRepository.findByName(RoleEnum.SUPER_ADMIN)
+                .orElseThrow(() -> new IllegalArgumentException("Role not found: SUPER_ADMIN"));
+    }
+
+    private void createSuperAdmin(Role superAdminRole) {
+        try {
+            log.info("Creating super admin");
+            RegisterUserDto superAdminDto = new RegisterUserDto();
+            superAdminDto.setFirstName(SUPER_ADMIN_FIRST_NAME);
+            superAdminDto.setLastName(SUPER_ADMIN_LAST_NAME);
+            superAdminDto.setPhoneNumber(SUPER_ADMIN_PHONE);
+            superAdminDto.setRole(RoleEnum.SUPER_ADMIN);
+            superAdminDto.setEmail(superAdminEmail);
+            superAdminDto.setPassword(superAdminPassword);
+
+            authenticationService.signUp(superAdminDto);
+
+            log.info("Super admin successfully created with email: {}", superAdminEmail);
+        } catch (Exception e) {
+            log.error("Failed to create super admin: {}", e.getMessage(), e);
         }
     }
 }

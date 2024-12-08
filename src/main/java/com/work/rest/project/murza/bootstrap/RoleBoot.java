@@ -9,9 +9,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Arrays;
 
 @Slf4j
 @Component
@@ -22,37 +20,27 @@ public class RoleBoot implements ApplicationListener<ContextRefreshedEvent> {
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        this.loadRoles();
+        initializeRoles();
     }
 
-    public void loadRoles() {
-        log.info("Checking roles");
+    private void initializeRoles() {
+        log.info("Starting role initialization");
 
-        if (roleRepository.count() != RoleEnum.values().length) {
-            EnumSet<RoleEnum> roleEnums = EnumSet.of(RoleEnum.USER, RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN);
-            Map<RoleEnum, String> roleDescription = Map.of(
-                    RoleEnum.USER, "Default user role (client)",
-                    RoleEnum.ADMIN, "Default administrator role (moderator/manager)",
-                    RoleEnum.SUPER_ADMIN, "Super-admin role (CEO | main-developer)"
+        Arrays.stream(RoleEnum.values()).forEach(roleEnum -> {
+            roleRepository.findByName(roleEnum).ifPresentOrElse(
+                    existingRole -> log.debug("Role '{}' already exists", existingRole.getName()),
+                    () -> createRole(roleEnum)
             );
+        });
 
-            log.info("Initializing roles");
-            roleEnums.forEach(roleName -> {
-                Optional<Role> role = roleRepository.findByName(roleName);
-                role.ifPresentOrElse(
-                        existingRole -> log.info("Role {} already exists with description: {}", existingRole.getName(), existingRole.getDescription()),
-                        () -> {
-                            Role roleForCreate = new Role();
-                            roleForCreate.setName(roleName);
-                            roleForCreate.setDescription(roleDescription.get(roleName));
-                            roleRepository.save(roleForCreate);
-                            log.info("Created role {} with description: {}", roleName, roleDescription.get(roleName));
-                        }
-                );
-            });
-        } else {
-            log.info("All roles are already initialized");
-        }
+        log.info("Role initialization complete");
+    }
+
+    private void createRole(RoleEnum roleEnum) {
+        Role role = new Role();
+        role.setName(roleEnum);
+        role.setDescription(roleEnum.getDescription());
+        roleRepository.save(role);
+        log.info("Created role '{}' with description '{}'", roleEnum, roleEnum.getDescription());
     }
 }
-

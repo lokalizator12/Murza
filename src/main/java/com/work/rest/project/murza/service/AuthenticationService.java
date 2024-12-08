@@ -1,11 +1,10 @@
 package com.work.rest.project.murza.service;
 
-import com.work.rest.project.murza.dto.auth.AuthenticateResponseDto;
-import com.work.rest.project.murza.dto.auth.LoginUserDto;
-import com.work.rest.project.murza.dto.auth.RegisterUserDto;
+import com.work.rest.project.murza.dto.auth.*;
 import com.work.rest.project.murza.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 public interface AuthenticationService {
 
@@ -16,4 +15,8 @@ public interface AuthenticationService {
     AuthenticateResponseDto authenticate(LoginUserDto input, HttpServletResponse response);
 
     AuthenticateResponseDto refreshJwt(HttpServletRequest request, HttpServletResponse response);
+
+    void forgotPassword(@Valid ForgotPasswordRequest request);
+
+    void resetPassword(@Valid ResetPasswordRequest request);
 }
