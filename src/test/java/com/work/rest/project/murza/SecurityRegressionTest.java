@@ -5,6 +5,10 @@ import com.work.rest.project.murza.controller.AuthenticationController;
 import com.work.rest.project.murza.configuration.JwtHandshakeInterceptor;
 import com.work.rest.project.murza.dto.auth.RegisterUserDto;
 import com.work.rest.project.murza.entity.RoleEnum;
+import com.work.rest.project.murza.dto.auth.ForgotPasswordRequest;
+import com.work.rest.project.murza.dto.auth.ResetPasswordRequest;
+import com.work.rest.project.murza.entity.VerificationCode;
+import com.work.rest.project.murza.exception.VerificationCodeNotFoundException;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.Requests.TripRequest;
 import com.work.rest.project.murza.entity.User;
@@ -18,6 +22,15 @@ import com.work.rest.project.murza.service.impl.requests.ParcelRequestServiceImp
 import com.work.rest.project.murza.service.impl.requests.TripRequestServiceImpl;
 import com.work.rest.project.murza.service.security.JwtService;
 import com.work.rest.project.murza.repository.UserRepository;
+import com.work.rest.project.murza.repository.RoleRepository;
+import com.work.rest.project.murza.repository.VerificationCodeRepository;
+import com.work.rest.project.murza.service.UserDetailsService;
+import com.work.rest.project.murza.service.impl.AuthenticationServiceImpl;
+import com.work.rest.project.murza.service.impl.settings.VerificationServiceImpl;
+import com.work.rest.project.murza.service.settings.EmailService;
+import com.work.rest.project.murza.service.settings.SmsService;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -74,6 +87,48 @@ class SecurityRegressionTest {
 
         assertFalse(interceptor.beforeHandshake(new ServletServerHttpRequest(request), null, null, new HashMap<>()));
         verifyNoInteractions(jwt, users);
+    }
+
+    @Test
+    void resetValidationOnlyAcceptsPasswordResetTokens() {
+        VerificationCodeRepository codes = mock(VerificationCodeRepository.class);
+        VerificationServiceImpl service = new VerificationServiceImpl(
+                codes, mock(UserRepository.class), mock(EmailService.class), mock(SmsService.class));
+
+        assertFalse(service.isCodeValid("activation-token"));
+        verify(codes).findByCodeAndType("activation-token", "password-reset");
+    }
+
+    @Test
+    void forgotPasswordUsesServerUrlAndRejectsInvalidResetToken() {
+        UserRepository users = mock(UserRepository.class);
+        VerificationCodeRepository codes = mock(VerificationCodeRepository.class);
+        VerificationService verification = mock(VerificationService.class);
+        EmailService email = mock(EmailService.class);
+        AuthenticationServiceImpl service = new AuthenticationServiceImpl(
+                mock(PasswordEncoder.class), users, mock(RoleRepository.class), codes,
+                mock(AuthenticationManager.class), mock(UserDetailsService.class), mock(JwtService.class),
+                mock(BlacklistJwtService.class), verification, email);
+        ReflectionTestUtils.setField(service, "frontendBaseUrl", "http://172.90.90.185");
+        User user = user(1L);
+        user.setEmail("test@example.test");
+        when(users.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(verification.generateVerificationCode(user, "password-reset"))
+                .thenReturn(VerificationCode.builder().user(user).type("password-reset").build());
+        ForgotPasswordRequest forgot = new ForgotPasswordRequest();
+        forgot.setEmail(user.getEmail());
+
+        service.forgotPassword(forgot);
+
+        verify(email).sendEmail(eq(user.getEmail()), eq("Reset password"),
+                argThat(body -> body.contains("http://172.90.90.185/reset-password?token=")));
+        verify(codes).save(argThat(code -> code.getType().equals("password-reset") && code.getCode().length() == 36));
+
+        ResetPasswordRequest reset = new ResetPasswordRequest();
+        reset.setToken("activation-token");
+        reset.setNewPassword("new-password");
+        assertThrows(VerificationCodeNotFoundException.class, () -> service.resetPassword(reset));
+        verify(users, never()).save(any(User.class));
     }
 
     @Test

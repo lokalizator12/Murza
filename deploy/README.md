@@ -15,7 +15,7 @@ The backend adds missing standard shipping methods at startup. It preserves exis
 ## Current stabilization status
 
 - Backend and frontend build successfully in Docker.
-- Backend security regression tests cover private user fields, request ownership, public signup role, and revoked WebSocket tokens.
+- Backend security regression tests cover private user fields, request ownership, public signup role, revoked WebSocket tokens, and password reset tokens.
 - Frontend wizard test covers retaining form data through submission.
 - Live API checks cover login, request lists, ownership, input validation, and shipping methods.
 
@@ -24,6 +24,6 @@ The backend adds missing standard shipping methods at startup. It preserves exis
 1. Add a domain and HTTPS before production use. Current HTTP traffic exposes credentials in transit.
 2. Rotate the external credentials shared during setup (AWS, SMTP, Twilio, reCAPTCHA, and other keys), then update the private `.env`.
 3. Replace Hibernate schema auto-update and the disabled Flyway setup with reviewed, repeatable database migrations. Back up the existing volume first.
-4. Add integration tests for registration, verification, password reset, profile updates, subscriptions, chat, and file uploads.
+4. Add integration tests for registration, verification, password reset email delivery, profile updates, subscriptions, chat, and file uploads.
 5. Review large list endpoints and database query counts. Some endpoints load entire tables or related users per row.
 6. Modernize the frontend build tool and dependency set; the current Create React App build reports maintenance warnings.

@@ -196,8 +196,8 @@ public class VerificationServiceImpl implements VerificationService {
 
     @Override
     public boolean isCodeValid(String token) {
-        return codeRepository.findByCodeAndNotVerified(token)
-                .filter(t -> t.getExpirationTime().after(new Date()))
+        return codeRepository.findByCodeAndType(token, "password-reset")
+                .filter(t -> !t.isVerified() && t.getExpirationTime().after(new Date()))
                 .isPresent();
     }
 
@@ -205,7 +205,7 @@ public class VerificationServiceImpl implements VerificationService {
     public void setCodeInvalid(String code) {
         if (isCodeValid(code)) {
             log.info("Code is valid");
-            VerificationCode verificationCode = codeRepository.findByCodeAndNotVerified(code)
+            VerificationCode verificationCode = codeRepository.findByCodeAndType(code, "password-reset")
                     .orElseThrow(() -> new VerificationCodeNotFoundException("Invalid verification code" + code));
             verificationCode.setVerified(true);
             codeRepository.save(verificationCode);
