@@ -1,0 +1,111 @@
+name: murza
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: murza
+      MYSQL_USER: murza
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command: ["--innodb-buffer-pool-size=128M"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["--wiredTigerCacheSizeGB", "0.25"]
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  kafka:
+    image: apache/kafka:3.9.0
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx512m
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
+  backend:
+    image: murza-backend:local
+    build: ../../app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_started
+    environment:
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx512m
+      SPRING_PROFILES_ACTIVE: dev
+      FRONTEND_BASE_URL: http://${MURZA_HOST}
+      AUTH_COOKIE_SECURE: "false"
+      MYSQL_DATABASE_URL: jdbc:mysql://mysql:3306/murza?createDatabaseIfNotExist=true
+      MYSQL_USER: murza
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MONGODB_URI: mongodb://mongo:27017/murza
+      REDIS_HOST: redis
+      CORS_ALLOWED_ORIGINS: http://${MURZA_HOST}
+      JWT_SECRET: ${JWT_SECRET}
+      SECRET_KEY: ${SECRET_KEY}
+      SUPER_ADMIN_EMAIL: ${SUPER_ADMIN_EMAIL}
+      SUPER_ADMIN_PASSWORD: ${SUPER_ADMIN_PASSWORD}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-eu-north-1}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      MAIL_SENDER_ACCESS_USERNAME: ${MAIL_SENDER_ACCESS_USERNAME}
+      MAIL_SENDER_ACCESS_PASSWORD: ${MAIL_SENDER_ACCESS_PASSWORD}
+      TWILIO_SMS_SENDER_PHONE: ${TWILIO_SMS_SENDER_PHONE}
+      TWILIO_SMS_SENDER_SID: ${TWILIO_SMS_SENDER_SID}
+      TWILIO_SMS_SENDER_TOKEN: ${TWILIO_SMS_SENDER_TOKEN}
+      RECAPTCHA_SECRET: ${RECAPTCHA_SECRET}
+      TINYURL_API_TOKEN: ${TINYURL_API_TOKEN:-}
+
+  frontend:
+    image: murza-frontend:local
+    build:
+      context: ../../frontend
+      args:
+        REACT_APP_MAPBOX_TOKEN: ${REACT_APP_MAPBOX_TOKEN}
+        REACT_APP_RECAPTCHA_SITE_KEY: ${REACT_APP_RECAPTCHA_SITE_KEY}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    volumes:
+      - acme_webroot:/var/www/certbot:ro
+      - letsencrypt:/etc/letsencrypt:ro
+
+volumes:
+  mysql_data:
+  mongo_data:
+  kafka_data:
+  acme_webroot:
+  letsencrypt:

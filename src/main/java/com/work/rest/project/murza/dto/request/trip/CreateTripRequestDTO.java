@@ -5,6 +5,9 @@ import com.work.rest.project.murza.entity.Requests.IntermediateLocation;
 import com.work.rest.project.murza.entity.Requests.ShippingMethod;
 import com.work.rest.project.murza.entity.Requests.TripRequest;
 import com.work.rest.project.murza.entity.User;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.util.Date;
@@ -15,22 +18,22 @@ import java.util.List;
 public class CreateTripRequestDTO {
     private double departureLatitude;
     private double departureLongitude;
-    private String departureAddress;
+    @NotBlank private String departureAddress;
     private double destinationLatitude;
     private double destinationLongitude;
-    private String destinationAddress;
-    private double maxWeight;
-    private double maxVolume;
-    private Date departureDate;
-    private Date destinationDate;
+    @NotBlank private String destinationAddress;
+    @Positive private double maxWeight;
+    @Positive private double maxVolume;
+    @NotNull private Date departureDate;
+    @NotNull private Date destinationDate;
     private List<Long> acceptedItemsId;
     private List<Long> declinedItemsId;
-    private String description;
-    private Long shippingMethodId;
+    @NotBlank private String description;
+    @NotNull private Long shippingMethodId;
     private List<IntermediateLocation> intermediateLocations;
-    private double maxHeight;
-    private double maxWidth;
-    private double maxLength;
+    @Positive private double maxHeight;
+    @Positive private double maxWidth;
+    @Positive private double maxLength;
 
     public TripRequest toEntity(ShippingMethod shippingMethod, User user) {
         TripRequest tripRequest = new TripRequest();
@@ -54,6 +57,5 @@ public class CreateTripRequestDTO {
         return tripRequest;
     }
 }
-
 
 

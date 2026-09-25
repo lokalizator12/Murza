@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
             user.setPhoneNumber(settingsDto.getPhoneNumber());
         }
 
-        if (settingsDto.getNewPassword() != null && settingsDto.getNewPassword().isEmpty()) {
+        if (settingsDto.getNewPassword() != null && !settingsDto.getNewPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(settingsDto.getNewPassword()));
         }
 
@@ -115,7 +115,6 @@ public class UserServiceImpl implements UserService {
     public User createProfileAdmin(RegisterUserDto registerUserDto) {
         log.info("Start creating a new admin profile for email: {}", registerUserDto.getEmail());
         registerUserDto.setRole(RoleEnum.ADMIN);
-        registerUserDto.setPassword(passwordEncoder.encode(registerUserDto.getPassword()));
         return authenticationService.signUp(registerUserDto);
     }
 

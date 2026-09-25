@@ -4,6 +4,9 @@ package com.work.rest.project.murza.dto.request.parcel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.User;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.util.Date;
@@ -12,24 +15,24 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class CreateParcelRequestDTO {
-    private String description;
-    private String title;
+    @NotBlank private String description;
+    @NotBlank private String title;
     private boolean declaration;
-    private double weight;
-    private String size;
-    private double price;
-    private Date pickupDate;
-    private Date deliveryDate;
+    @Positive private double weight;
+    @NotBlank private String size;
+    @Positive private double price;
+    @NotNull private Date pickupDate;
+    @NotNull private Date deliveryDate;
     private double pickupLatitude;
     private double pickupLongitude;
-    private String pickupAddress;
+    @NotBlank private String pickupAddress;
     private double deliveryLatitude;
     private double deliveryLongitude;
-    private String deliveryAddress;
-    private double volume;
-    private double height;
-    private double width;
-    private double length;
+    @NotBlank private String deliveryAddress;
+    @Positive private double volume;
+    @Positive private double height;
+    @Positive private double width;
+    @Positive private double length;
     private Double suggestedPrice;
 
     public ParcelRequest toEntity(User sender) {

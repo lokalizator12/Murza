@@ -7,6 +7,7 @@ import com.work.rest.project.murza.dto.request.trip.TripRequestMiniSummaryDTO;
 import com.work.rest.project.murza.dto.request.trip.UpdateTripRequestDTO;
 import com.work.rest.project.murza.entity.Requests.TripRequest;
 import com.work.rest.project.murza.service.request.TripRequestService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,7 +29,7 @@ public class TripRequestController {
     private final TripRequestService tripRequestService;
 
     @PostMapping(value = "/create")
-    public ResponseEntity<TripRequest> createTripRequest(@RequestBody CreateTripRequestDTO tripRequestDTO) throws IOException {
+    public ResponseEntity<TripRequest> createTripRequest(@Valid @RequestBody CreateTripRequestDTO tripRequestDTO) throws IOException {
         log.info("Creating new trip request");
         TripRequest createdRequest = tripRequestService.createTripRequest(tripRequestDTO);
         log.info("Trip request created with ID: {}", createdRequest.getIdTrip());

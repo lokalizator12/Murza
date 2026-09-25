@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -132,20 +133,28 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
 
     @Override
     public void deleteParcelRequest(UUID id) {
-        if (!parcelRequestRepository.existsById(id)) throw new TripRequestNotFoundException(id.toString());
-        parcelRequestRepository.deleteById(id);
-        log.info("Trip request with ID {} deleted", id);
+        ParcelRequest request = getParcelRequestById(id);
+        requireOwner(request);
+        parcelRequestRepository.delete(request);
+        log.info("Parcel request with ID {} deleted", id);
     }
 
     @Override
     public void markAsRealized(UUID id) {
         ParcelRequest parcelRequest = parcelRequestRepository.findById(id)
                 .orElseThrow(() -> new ParcelRequestNotFoundException(id.toString()));
+        requireOwner(parcelRequest);
         if (parcelRequest.isRealized()) {
             throw new ParcelRequestAlreadyRealizedException(id.toString());
         }
         parcelRequest.setRealized(true);
         parcelRequest.setRealizedAt(new Date());
         parcelRequestRepository.save(parcelRequest);
+    }
+
+    private void requireOwner(ParcelRequest request) {
+        if (!request.getSender().getId().equals(userService.getCurrentUser().getId())) {
+            throw new AccessDeniedException("Only the parcel owner can change this request");
+        }
     }
 }

@@ -103,7 +103,6 @@ public class MessageServiceImpl implements MessageService {
     }
 
     public String decryptMessageContent(String encryptedContent) {
-        log.info("encrypted to decr: {}", encryptedContent);
         return encryptionService.decrypt(encryptedContent);
     }
 }

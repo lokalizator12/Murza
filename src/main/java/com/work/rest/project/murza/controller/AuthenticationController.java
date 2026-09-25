@@ -3,6 +3,7 @@ package com.work.rest.project.murza.controller;
 import com.work.rest.project.murza.dto.auth.*;
 import com.work.rest.project.murza.dto.profile.UserProfileDto;
 import com.work.rest.project.murza.entity.User;
+import com.work.rest.project.murza.entity.RoleEnum;
 import com.work.rest.project.murza.mapper.UserMapper;
 import com.work.rest.project.murza.service.AuthenticationService;
 import com.work.rest.project.murza.service.UserService;
@@ -30,11 +31,12 @@ public class AuthenticationController {
     private final VerificationService verificationService;
 
     @PostMapping("/signup")
-    private ResponseEntity<User> registration(@Valid @RequestBody RegisterUserDto registerUserDto) {
+    private ResponseEntity<String> registration(@Valid @RequestBody RegisterUserDto registerUserDto) {
         log.info("Start registration");
-        User registerUser = authenticationService.signUp(registerUserDto);
-        log.info("Cancel registration");
-        return ResponseEntity.ok(registerUser);
+        registerUserDto.setRole(RoleEnum.USER);
+        authenticationService.signUp(registerUserDto);
+        log.info("Registration completed");
+        return ResponseEntity.ok("Registration successful");
     }
 
     @PostMapping("/login")
@@ -83,7 +85,7 @@ public class AuthenticationController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
-        log.info("Forgot password request: {}", request);
+        log.info("Forgot password request received");
         authenticationService.forgotPassword(request);
         log.info("Forgot password successful");
         return new ResponseEntity<>(HttpStatus.OK);
@@ -91,7 +93,7 @@ public class AuthenticationController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
-        log.info("Reset password request: {}", request);
+        log.info("Reset password request received");
         authenticationService.resetPassword(request);
         log.info("Reset password successful");
         return ResponseEntity.ok("Password successfully reset.");

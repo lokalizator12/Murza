@@ -47,7 +47,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         Long senderId = extractUserIdFromSession(session);
         if (senderId != null) {
-            log.info("Received message from user {}: {}", senderId, message.getPayload());
+            log.info("Received message from user {}", senderId);
             // Дополнительная логика может быть добавлена при необходимости
         }
     }
@@ -62,18 +62,14 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     public void sendMessageToUser(Long userId, Message message) {
-        log.info("{}: {}", userId, message);
         WebSocketSession session = userSessions.get(userId);
-        log.info(session.toString());
-        log.info(session.getId());
-        log.info(String.valueOf(session.isOpen()));
         if (session != null && session.isOpen()) {
             try {
                 String messageJson = new ObjectMapper()
                         .registerModule(new JavaTimeModule())
                         .writeValueAsString(message);
                 session.sendMessage(new TextMessage(messageJson));
-                log.info("Sent message to user {}: {}", userId, messageJson);
+                log.info("Sent message to user {}", userId);
             } catch (Exception e) {
                 log.error("Failed to send message to user {}", userId, e);
             }

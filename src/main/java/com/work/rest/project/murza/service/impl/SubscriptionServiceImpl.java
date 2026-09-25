@@ -56,7 +56,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         User follower = userService.getUserById(followerId);
         User followed = userService.getUserById(followedId);
 
-        subscriptionRepository.findByFollowedAndFollowerOrReversed(followed, follower)
+        subscriptionRepository.findByFollowerAndFollowed(follower, followed)
                 .ifPresentOrElse(subscriptionRepository::delete,
                         () -> {
                             throw new SubscribeException("Subscription not found");

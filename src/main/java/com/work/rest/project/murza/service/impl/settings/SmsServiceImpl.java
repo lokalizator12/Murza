@@ -30,7 +30,7 @@ public class SmsServiceImpl implements SmsService {
     public void sendSms(String phoneNumber, String message) {
         validateInput(phoneNumber, message);
         try {
-            log.info("Attempting to send SMS to {} with message: {}", phoneNumber, message);
+            log.info("Attempting to send SMS to {}", phoneNumber);
             MessageCreator messageCreator = Message.creator(
                     new PhoneNumber(phoneNumber),
                     new PhoneNumber(fromPhoneNumber),

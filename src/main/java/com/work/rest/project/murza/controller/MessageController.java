@@ -27,7 +27,7 @@ public class MessageController {
             @PathVariable Long receiverId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        log.info("get mesagges for: " + receiverId + ", user: " + currentUser);
+        log.info("Get messages for receiver {}, requested by user {}", receiverId, currentUser.getId());
         Pageable pageable = PageRequest.of(page, size);
         Page<Message> messages = messageService.getMessageHistory(currentUser.getId(), receiverId, pageable);
 

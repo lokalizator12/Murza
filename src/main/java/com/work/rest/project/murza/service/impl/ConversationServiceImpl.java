@@ -42,13 +42,9 @@ public class ConversationServiceImpl implements ConversationService {
         List<ConversationDto> conversationDtos = new ArrayList<>();
         for (Conversation conversation : conversations) {
             String conversationId = conversation.getId();
-            log.info(conversationId);
             List<Message> messages = messageRepository.findByConversationIdOrderByTimestampDesc(conversationId);
-            log.info(messages.toString());
             if (!messages.isEmpty()) {
                 Message lastMessage = messages.get(0);
-                log.info(lastMessage.toString());
-                log.info(lastMessage.getContent());
                 String decryptedContent = encryptionService.decrypt(lastMessage.getContent());
                 lastMessage.setContent(decryptedContent);
 

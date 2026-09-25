@@ -8,7 +8,6 @@ import com.work.rest.project.murza.repository.VerificationCodeRepository;
 import com.work.rest.project.murza.service.settings.EmailService;
 import com.work.rest.project.murza.service.settings.SmsService;
 import com.work.rest.project.murza.service.settings.VerificationService;
-import com.work.rest.project.murza.service.utils.TinyUrlService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +23,6 @@ public class VerificationServiceImpl implements VerificationService {
 
     private final VerificationCodeRepository codeRepository;
     private final UserRepository userRepository;
-    private final TinyUrlService tinyUrlService;
     private final EmailService emailService;
     private final SmsService smsService;
 
@@ -34,6 +32,9 @@ public class VerificationServiceImpl implements VerificationService {
 
     @Value("${verification-status.block-duration-minutes}")
     private int BLOCK_DURATION_MINUTES;
+
+    @Value("${frontend.base-url}")
+    private String frontendBaseUrl;
 
     @Override
     public void sendVerificationCode(Long userId, String type) {
@@ -92,13 +93,15 @@ public class VerificationServiceImpl implements VerificationService {
         String token = UUID.randomUUID().toString();
 
         VerificationCode verificationCode = generateVerificationCode(user, "email");
+        verificationCode.setCode(token);
+        verificationCode.setExpirationTime(new Date(System.currentTimeMillis() + 60L * 60 * 1000));
         verificationCode.setVerified(false);
 
         codeRepository.save(verificationCode);
 
-        String activationLink = "http://localhost:3000/activate?token=" + token;
-        String shortLink = tinyUrlService.shortenUrl(activationLink);
-        emailService.sendVerificationEmail(user.getEmail(), shortLink);
+        String activationLink = frontendBaseUrl + "/activate?token=" + token;
+        emailService.sendEmail(user.getEmail(), "Activate your MURZA account",
+                "Open this link to activate your account: " + activationLink);
     }
 
     @Override

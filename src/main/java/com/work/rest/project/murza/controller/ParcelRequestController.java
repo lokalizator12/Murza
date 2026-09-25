@@ -7,6 +7,7 @@ import com.work.rest.project.murza.dto.request.parcel.ParcelRequestMapDTO;
 import com.work.rest.project.murza.dto.request.parcel.ParcelRequestMiniSummaryDTO;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.service.request.ParcelRequestService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ public class ParcelRequestController {
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ParcelRequest> createParcelRequest(
-            @RequestPart("parcelRequest") CreateParcelRequestDTO parcelRequestDTO,
+            @Valid @RequestPart("parcelRequest") CreateParcelRequestDTO parcelRequestDTO,
             @RequestPart(name = "files", required = false) List<MultipartFile> files) throws IOException {
         log.info("Creating new parcel request");
         ParcelRequest createdRequest = parcelRequestService.createParcelRequest(parcelRequestDTO, files);
@@ -103,4 +104,3 @@ public class ParcelRequestController {
         return ResponseEntity.noContent().build();
     }
 }
-

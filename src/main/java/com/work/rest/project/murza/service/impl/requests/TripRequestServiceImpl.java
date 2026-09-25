@@ -29,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -61,16 +62,18 @@ public class TripRequestServiceImpl implements TripRequestService {
         }
         tripRequest.setIntermediateLocations(intermediateLocations);
 
-        List<ItemsDelivery> acceptedItems = itemsDeliveryRepository.findAllById(tripRequestDTO.getAcceptedItemsId());
+        List<ItemsDelivery> acceptedItems = itemsDeliveryRepository.findAllById(
+                tripRequestDTO.getAcceptedItemsId() == null ? List.of() : tripRequestDTO.getAcceptedItemsId());
         log.info("Accepted Items: {}", acceptedItems);
 
-        List<ItemsDelivery> declinedItems = itemsDeliveryRepository.findAllById(tripRequestDTO.getDeclinedItemsId());
+        List<ItemsDelivery> declinedItems = itemsDeliveryRepository.findAllById(
+                tripRequestDTO.getDeclinedItemsId() == null ? List.of() : tripRequestDTO.getDeclinedItemsId());
         log.info("Declined Items: {}", declinedItems);
 
         tripRequest.setAcceptedItems(acceptedItems);
         tripRequest.setDeclinedItems(declinedItems);
         TripRequest savedTripRequest = tripRequestRepository.save(tripRequest);
-        log.info("Trip request created: {}", savedTripRequest);
+        log.info("Trip request created with ID {}", savedTripRequest.getIdTrip());
 
         return savedTripRequest;
     }
@@ -147,8 +150,9 @@ public class TripRequestServiceImpl implements TripRequestService {
 
     @Override
     public void deleteTripRequest(Long id) {
-        if (!tripRequestRepository.existsById(id)) throw new TripRequestNotFoundException(id.toString());
-        tripRequestRepository.deleteById(id);
+        TripRequest request = getTripRequestById(id);
+        requireOwner(request);
+        tripRequestRepository.delete(request);
         log.info("Trip request with ID {} deleted", id);
     }
 
@@ -156,6 +160,7 @@ public class TripRequestServiceImpl implements TripRequestService {
     public void updateTripRequest(UpdateTripRequestDTO dto) {
         TripRequest existingTripRequest = tripRequestRepository.findById(dto.getTripId())
                 .orElseThrow(() -> new TripRequestNotFoundException(dto.getTripId().toString()));
+        requireOwner(existingTripRequest);
         log.info("Update Trip request with id: {}", dto.getTripId());
         tripRequestRepository.save(existingTripRequest);
     }
@@ -163,12 +168,19 @@ public class TripRequestServiceImpl implements TripRequestService {
     @Override
     public void markAsRealized(Long id) {
         TripRequest tripRequest = tripRequestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Trip request not found"));
+                .orElseThrow(() -> new TripRequestNotFoundException(id.toString()));
+        requireOwner(tripRequest);
         if (tripRequest.isRealized()) {
             throw new IllegalStateException("Trip request is already realized");
         }
         tripRequest.setRealized(true);
         tripRequest.setRealizedAt(new Date());
         tripRequestRepository.save(tripRequest);
+    }
+
+    private void requireOwner(TripRequest request) {
+        if (!request.getDriver().getId().equals(userService.getCurrentUser().getId())) {
+            throw new AccessDeniedException("Only the trip owner can change this request");
+        }
     }
 }

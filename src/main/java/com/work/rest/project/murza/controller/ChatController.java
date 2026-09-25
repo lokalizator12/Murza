@@ -47,7 +47,6 @@ public class ChatController {
             return;
         }
 
-        log.info("Sender: {}", sender);
         User receiver = userRepository.findById(chatMessage.getReceiverId()).orElse(null);
         if (receiver == null) {
             log.error("Receiver not found");
@@ -55,7 +54,6 @@ public class ChatController {
         }
 
         // Save message
-        log.info("Receiver: {}", receiver);
         Message message = messageService.sendMessage(
                 sender.getId(),
                 receiver.getId(),

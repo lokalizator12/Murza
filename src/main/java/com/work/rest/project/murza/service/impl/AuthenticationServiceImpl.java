@@ -21,11 +21,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -45,7 +47,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final TinyUrlService tinyUrlService;
     private final EmailService emailService;
 
+    @Value("${auth.cookie.secure:true}")
+    private boolean secureCookies;
+
     @Override
+    @Transactional
     public User signUp(@Valid RegisterUserDto userDto) {
         log.info("Start registration new user with email: {}", userDto.getEmail());
         Optional<User> existingUserByEmail = userRepository.findByEmail(userDto.getEmail());
@@ -105,7 +111,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Cookie refreshCookie = new Cookie("refresh-token", null);
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true); //TODO DELETE THIS LINE WHEN PROJECT WAS DEPLOY TO HOST!!!!!! HTTP
+        refreshCookie.setSecure(secureCookies);
         refreshCookie.setPath("/api/auth/refresh");
         refreshCookie.setMaxAge(0);
         response.addCookie(refreshCookie);
@@ -129,7 +135,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Cookie refreshCookie = new Cookie("refresh-token", refreshToken);
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true);
+        refreshCookie.setSecure(secureCookies);
         refreshCookie.setPath("/api/auth/refresh");
         refreshCookie.setMaxAge(jwtService.getRefreshExpirationInMs() / 1000);
         response.addCookie(refreshCookie);

@@ -33,6 +33,9 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<String> saveFiles(List<MultipartFile> files, String prefix, String entityId) throws IOException {
         List<String> fileUrls = new ArrayList<>();
+        if (files == null || files.isEmpty()) {
+            return fileUrls;
+        }
         int i = 0;
         for (MultipartFile file : files) {
 
@@ -76,4 +79,3 @@ public class FileServiceImpl implements FileService {
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, fileName);
     }
 }
-

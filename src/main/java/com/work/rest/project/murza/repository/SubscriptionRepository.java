@@ -14,8 +14,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     List<Subscription> findByFollowed(User followed);
 
-    @Query("SELECT s FROM Subscription s WHERE (s.followed = :followed AND s.follower = :follower) OR (s.followed = :follower AND s.follower = :followed)")
-    Optional<Subscription> findByFollowedAndFollowerOrReversed(@Param("followed") User followed, @Param("follower") User follower);
+    Optional<Subscription> findByFollowerAndFollowed(User follower, User followed);
 
     boolean existsByFollowerAndFollowed(User follower, User followed);
 

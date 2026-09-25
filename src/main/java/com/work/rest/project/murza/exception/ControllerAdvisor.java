@@ -44,7 +44,7 @@ public class ControllerAdvisor {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         log.error("Database integrity violation: {}", ex.getMessage());
-        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("database", ex.getMostSpecificCause().getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("database", "The request conflicts with existing data");
         return buildErrorResponse(
                 HttpStatus.CONFLICT,
                 "Database error",
@@ -209,7 +209,7 @@ public class ControllerAdvisor {
     public ResponseEntity<ApiErrorResponse> handleAllExceptions(Exception ex) {
         String errorType = ex.getClass().getSimpleName();
         log.error("Unhandled exception: {}", ex.getMessage(), ex);
-        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail(errorType, ex.getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail(errorType, "An unexpected error occurred");
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", List.of(errorDetail));
     }
 }

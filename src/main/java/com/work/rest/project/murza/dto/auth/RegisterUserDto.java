@@ -20,6 +20,7 @@ public class RegisterUserDto {
 
     @NotBlank(message = "Password is mandatory")
     @Size(min = 8, message = "Password should be at least 6 characters long")
+    @ToString.Exclude
     private String password;
 
     @NotBlank(message = "First name is mandatory")
