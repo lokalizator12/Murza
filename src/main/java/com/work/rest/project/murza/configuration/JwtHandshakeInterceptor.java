@@ -44,6 +44,8 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         Optional<User> userOptional = userRepository.findByEmail(username);
         if (userOptional.isPresent() && jwtService.isTokenValid(token, userOptional.get())) {
             attributes.put("username", userOptional.get().getEmail());
+            attributes.put("accessToken", token);
+            attributes.put("authenticatedUser", userOptional.get());
             log.info("WebSocket handshake successful for user: {}", username);
             return true;
         } else {

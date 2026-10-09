@@ -19,6 +19,14 @@ The backend adds missing standard shipping methods at startup. It preserves exis
 - Frontend wizard test covers retaining form data through submission.
 - Live API checks cover login, request lists, ownership, input validation, and shipping methods.
 
+## Authenticated messages
+
+`POST /api/messages` accepts a recipient ID and 1–2,000 characters, returns the saved message with HTTP 201, and broadcasts to the two participants. The sender comes from authentication. Redis atomically limits each account to 30 sends per 60 seconds; authenticated chat uses this limit instead of an external CAPTCHA. The legacy STOMP send route uses the same delivery service. History pages are capped at 100 messages. Message timestamps use UTC instants, and MongoDB continues storing encrypted content.
+
+WebSocket clients can subscribe only to their own message/read-receipt queues and public presence topics. They can publish only to explicit application actions. Expiration and revocation are checked again on CONNECT, SEND and SUBSCRIBE. The inbox loads the last message and an unread count instead of materializing every conversation's history; read receipts update only incoming unread messages.
+
+The frontend's `PROJECT_PROGRESS.md` records completed development batches and the next product work.
+
 ## Remaining work
 
 1. Add a domain and HTTPS before production use. Current HTTP traffic exposes credentials in transit.
@@ -27,3 +35,4 @@ The backend adds missing standard shipping methods at startup. It preserves exis
 4. Add integration tests for registration, verification, password reset email delivery, profile updates, subscriptions, chat, and file uploads.
 5. Review large list endpoints and database query counts. Some endpoints load entire tables or related users per row.
 6. Modernize the frontend build tool and dependency set; the current Create React App build reports maintenance warnings.
+7. Add message request IDs for safe retries after uncertain delivery, enforce a unique conversation per pair of users, and review MongoDB indexes for history and unread counts.

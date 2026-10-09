@@ -42,11 +42,10 @@ public class ConversationServiceImpl implements ConversationService {
         List<ConversationDto> conversationDtos = new ArrayList<>();
         for (Conversation conversation : conversations) {
             String conversationId = conversation.getId();
-            List<Message> messages = messageRepository.findByConversationIdOrderByTimestampDesc(conversationId);
-            if (!messages.isEmpty()) {
-                Message lastMessage = messages.get(0);
+            var latest = messageRepository.findFirstByConversationIdOrderByTimestampDesc(conversationId);
+            if (latest.isPresent()) {
+                Message lastMessage = latest.get();
                 String decryptedContent = encryptionService.decrypt(lastMessage.getContent());
-                lastMessage.setContent(decryptedContent);
 
                 Long interlocutorId = conversation.getUser1Id().equals(currentUser.getId())
                         ? conversation.getUser2Id() : conversation.getUser1Id();
@@ -57,13 +56,12 @@ public class ConversationServiceImpl implements ConversationService {
                     dto.setInterlocutorId(interlocutorId);
                     dto.setInterlocutorName(interlocutor.getFirstName() + " " + interlocutor.getLastName());
                     dto.setInterlocutorPhoto(interlocutor.getUserPhoto());
-                    dto.setLastMessage(lastMessage.getContent());
-                    dto.setLastMessageTimestamp(Timestamp.valueOf(lastMessage.getTimestamp()));
+                    dto.setLastMessage(decryptedContent);
+                    dto.setLastMessageTimestamp(Timestamp.from(lastMessage.getTimestamp()));
 
-                    int unreadMessages = (int) messages.stream()
-                            .filter(msg -> msg.getReceiverId().equals(currentUser.getId()) && msg.getStatus() == MessageStatus.SENT)
-                            .count();
-                    dto.setUnreadMessages(unreadMessages);
+                    long unreadMessages = messageRepository.countByConversationIdAndReceiverIdAndStatus(
+                            conversationId, currentUser.getId(), MessageStatus.SENT);
+                    dto.setUnreadMessages((int) Math.min(unreadMessages, Integer.MAX_VALUE));
                     conversationDtos.add(dto);
                 }
             }
