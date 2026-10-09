@@ -23,7 +23,7 @@ public class AdminController {
     private final UserService userService;
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<User> createAdministrator(@Valid @RequestBody RegisterUserDto registerUserDto) {
         log.info("Attempt to create a new administrator with email: {}", registerUserDto.getEmail());
         User createdAdmin = userService.createProfileAdmin(registerUserDto);

@@ -32,6 +32,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public void subscribe(Long followerId, Long followedId) {
         log.info("User {} is subscribing to user {}", followerId, followedId);
 
+        if (followerId.equals(followedId)) throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.BAD_REQUEST, "You cannot follow yourself");
         User follower = userService.getUserById(followerId);
         User followed = userService.getUserById(followedId);
 
@@ -49,20 +51,32 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"followersCount", "followingCount"}, key = "#followerId")
+    @CacheEvict(value = {"followersCount", "followingCount"}, allEntries = true)
     public void unsubscribe(Long followerId, Long followedId) {
         log.info("User {} is unsubscribing from user {}", followerId, followedId);
 
+        if (followerId.equals(followedId)) throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.BAD_REQUEST, "You cannot follow yourself");
         User follower = userService.getUserById(followerId);
         User followed = userService.getUserById(followedId);
 
-        subscriptionRepository.findByFollowedAndFollowerOrReversed(followed, follower)
+        subscriptionRepository.findByFollowerAndFollowed(follower, followed)
                 .ifPresentOrElse(subscriptionRepository::delete,
                         () -> {
                             throw new SubscribeException("Subscription not found");
                         });
 
         log.info("Subscription removed successfully");
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = {"followersCount", "followingCount"}, allEntries = true)
+    public void removeFollower(Long followedId, Long followerId) {
+        User follower = userService.getUserById(followerId);
+        User followed = userService.getUserById(followedId);
+        subscriptionRepository.findByFollowerAndFollowed(follower, followed)
+                .ifPresent(subscriptionRepository::delete);
     }
 
     @Override

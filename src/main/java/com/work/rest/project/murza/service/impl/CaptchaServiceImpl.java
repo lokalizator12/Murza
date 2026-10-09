@@ -27,7 +27,6 @@ public class CaptchaServiceImpl implements CaptchaService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("secret", recaptchaSecret);
         params.add("response", captchaResponse);
-        log.info(captchaResponse);
         ResponseEntity<Map> response = restTemplate.postForEntity(recaptchaVerifyUrl, params, Map.class);
         Map<String, Object> body = response.getBody();
         if (body == null || !(Boolean) body.get("success")) {

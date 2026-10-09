@@ -15,11 +15,13 @@ import lombok.ToString;
 public class RegisterUserDto {
 
     @Email(message = "Email should be valid")
+    @Size(max = 254)
     @NotBlank(message = "Email is mandatory")
     private String email;
 
     @NotBlank(message = "Password is mandatory")
-    @Size(min = 8, message = "Password should be at least 6 characters long")
+    @Size(min = 8, max = 72, message = "Password must contain 8–72 characters")
+    @ToString.Exclude
     private String password;
 
     @NotBlank(message = "First name is mandatory")
@@ -31,8 +33,13 @@ public class RegisterUserDto {
     private String lastName;
 
     @NotBlank(message = "Phone number is mandatory")
-    @Pattern(regexp = "\\+\\d{1,15}", message = "Phone number must start with '+' and contain up to 15 digits")
+    @Pattern(regexp = "\\+\\d{10,15}", message = "Phone number must start with '+' and contain 10–15 digits")
     private String phoneNumber;
+
+    @jakarta.validation.constraints.AssertTrue(message = "Password must not exceed 72 UTF-8 bytes")
+    public boolean isPasswordWithinByteLimit() {
+        return password == null || password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= 72;
+    }
 
     @JsonIgnore
     private RoleEnum role = RoleEnum.USER;

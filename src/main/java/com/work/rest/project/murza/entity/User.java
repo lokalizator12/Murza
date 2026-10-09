@@ -1,5 +1,6 @@
 package com.work.rest.project.murza.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -32,15 +33,19 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String firstName;
 
+    @JsonIgnore
     @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
     private String lastName;
 
+    @JsonIgnore
     @Column(unique = true, nullable = false)
     private String phoneNumber;
 
+    @JsonIgnore
+    @ToString.Exclude
     @Column(nullable = false)
     private String password;
 
@@ -62,17 +67,23 @@ public class User implements UserDetails {
     private boolean online;
 
     private Date lastSeen;
+
+    @JsonIgnore
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private int credentialsVersion = 0;
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
         return List.of(authority);
     }
 
     @Override
+    @JsonIgnore
     public String getUsername() {
         return email;
     }

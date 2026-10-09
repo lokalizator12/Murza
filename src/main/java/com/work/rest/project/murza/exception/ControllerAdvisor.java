@@ -1,6 +1,7 @@
 package com.work.rest.project.murza.exception;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import org.springframework.web.server.ResponseStatusException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class ControllerAdvisor {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         log.error("Database integrity violation: {}", ex.getMessage());
-        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("database", ex.getMostSpecificCause().getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail("database", "The request conflicts with existing data");
         return buildErrorResponse(
                 HttpStatus.CONFLICT,
                 "Database error",
@@ -149,6 +150,11 @@ public class ControllerAdvisor {
         return buildErrorResponse(HttpStatus.FORBIDDEN, "Verification code expiration error", List.of(errorDetail));
     }
 
+    @ExceptionHandler(CredentialAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleCredentialConflict(CredentialAlreadyExistsException ex) {
+        return buildErrorResponse(HttpStatus.CONFLICT, "This email or phone number is already used by another account", List.of());
+    }
+
     @ExceptionHandler(SubscribeException.class)
     public ResponseEntity<ApiErrorResponse> handleSubscribeException(SubscribeException ex) {
         log.warn(ex.getMessage());
@@ -205,11 +211,17 @@ public class ControllerAdvisor {
     }
 
 
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleStatusException(ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(new ApiErrorResponse(
+                ex.getStatusCode().value(), ex.getReason(), List.of()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleAllExceptions(Exception ex) {
         String errorType = ex.getClass().getSimpleName();
         log.error("Unhandled exception: {}", ex.getMessage(), ex);
-        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail(errorType, ex.getMessage());
+        ApiErrorResponse.ErrorDetail errorDetail = new ApiErrorResponse.ErrorDetail(errorType, "An unexpected error occurred");
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", List.of(errorDetail));
     }
 }

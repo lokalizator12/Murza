@@ -18,5 +18,5 @@ public class UserProfileDto {
     private int followersCount;
     private boolean phoneVerified;
     private boolean emailVerified;
-    private double averageRating;
+    private Double averageRating;
 }

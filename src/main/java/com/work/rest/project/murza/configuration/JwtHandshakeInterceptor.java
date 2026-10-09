@@ -2,6 +2,7 @@ package com.work.rest.project.murza.configuration;
 
 import com.work.rest.project.murza.entity.User;
 import com.work.rest.project.murza.repository.UserRepository;
+import com.work.rest.project.murza.service.BlacklistJwtService;
 import com.work.rest.project.murza.service.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final BlacklistJwtService blacklistJwtService;
 
     @Override
     public boolean beforeHandshake(
@@ -28,7 +30,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
         String token = extractTokenFromQuery(request);
-        if (token == null) {
+        if (token == null || blacklistJwtService.isTokenBlacklisted(token)) {
             log.error("Missing or invalid token in WebSocket handshake");
             return false;
         }
@@ -40,8 +42,10 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         }
 
         Optional<User> userOptional = userRepository.findByEmail(username);
-        if (userOptional.isPresent()) {
+        if (userOptional.isPresent() && jwtService.isTokenValid(token, userOptional.get())) {
             attributes.put("username", userOptional.get().getEmail());
+            attributes.put("accessToken", token);
+            attributes.put("authenticatedUser", userOptional.get());
             log.info("WebSocket handshake successful for user: {}", username);
             return true;
         } else {

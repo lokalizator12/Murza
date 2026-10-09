@@ -9,7 +9,6 @@ public class UserMapper {
 
 
     public static UserProfileDto toUserProfileDto(User user) {
-        //TODO AVERAGE RATING, LAST ACTIVITY
         return UserProfileDto.builder()
                 .id(user.getId())
                 .userPhoto(user.getUserPhoto())
@@ -17,7 +16,6 @@ public class UserMapper {
                 .lastName(user.getLastName())
                 .emailVerified(user.isVerificationStatusEmail())
                 .phoneVerified(user.isVerificationStatusPhone())
-                .averageRating(5f)
                 .dateRegistered(user.getRegisteredAt())
                 .isOnline(user.isOnline())
                 .lastActivityDate(user.getLastSeen())

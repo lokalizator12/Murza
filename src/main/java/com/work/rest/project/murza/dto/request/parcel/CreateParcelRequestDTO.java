@@ -4,6 +4,13 @@ package com.work.rest.project.murza.dto.request.parcel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.work.rest.project.murza.entity.Requests.ParcelRequest;
 import com.work.rest.project.murza.entity.User;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.DecimalMax;
 import lombok.Data;
 
 import java.util.Date;
@@ -12,25 +19,30 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class CreateParcelRequestDTO {
-    private String description;
-    private String title;
+    @NotBlank @Size(max = 3000) private String description;
+    @NotBlank @Size(max = 120) private String title;
     private boolean declaration;
-    private double weight;
-    private String size;
-    private double price;
-    private Date pickupDate;
-    private Date deliveryDate;
-    private double pickupLatitude;
-    private double pickupLongitude;
-    private String pickupAddress;
-    private double deliveryLatitude;
-    private double deliveryLongitude;
-    private String deliveryAddress;
-    private double volume;
-    private double height;
-    private double width;
-    private double length;
+    @Positive private double weight;
+    @NotBlank @Size(max = 100) private String size;
+    @Positive private double price;
+    @NotNull private Date pickupDate;
+    @NotNull private Date deliveryDate;
+    @DecimalMin("-90") @DecimalMax("90") private double pickupLatitude;
+    @DecimalMin("-180") @DecimalMax("180") private double pickupLongitude;
+    @NotBlank @Size(max = 250) private String pickupAddress;
+    @DecimalMin("-90") @DecimalMax("90") private double deliveryLatitude;
+    @DecimalMin("-180") @DecimalMax("180") private double deliveryLongitude;
+    @NotBlank @Size(max = 250) private String deliveryAddress;
+    @Positive private double volume;
+    @Positive private double height;
+    @Positive private double width;
+    @Positive private double length;
     private Double suggestedPrice;
+
+    @AssertTrue(message = "Arrival cannot be earlier than departure")
+    public boolean isDateOrderValid() {
+        return pickupDate == null || deliveryDate == null || !deliveryDate.before(pickupDate);
+    }
 
     public ParcelRequest toEntity(User sender) {
         ParcelRequest parcelRequest = new ParcelRequest();

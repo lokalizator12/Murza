@@ -28,6 +28,12 @@ public class SubscriptionController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @DeleteMapping("/followers/{followerId}")
+    public ResponseEntity<Void> removeFollower(@PathVariable Long followerId, @AuthenticationPrincipal User currentUser) {
+        subscriptionService.removeFollower(currentUser.getId(), followerId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{userId}/followers")
     public ResponseEntity<?> getFollowers(@PathVariable Long userId) {
         return ResponseEntity.ok(subscriptionService.getFollowers(userId));

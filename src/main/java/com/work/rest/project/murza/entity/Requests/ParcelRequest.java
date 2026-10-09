@@ -32,6 +32,7 @@ public class ParcelRequest {
     private List<String> photos;
 
     @NotBlank(message = "Description is mandatory")
+    @Column(length = 3000)
     private String description;
 
     private boolean declaration;

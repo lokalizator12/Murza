@@ -18,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,7 +57,7 @@ public class MessageServiceImpl implements MessageService {
                 .receiverId(receiverId)
                 .conversationId(conversation.getId())
                 .content(encryptedContent)
-                .timestamp(LocalDateTime.now())
+                .timestamp(Instant.now())
                 .status(MessageStatus.SENT)
                 .build();
 
@@ -92,18 +92,14 @@ public class MessageServiceImpl implements MessageService {
 
         if (conversationOpt.isPresent()) {
             String conversationId = conversationOpt.get().getId();
-            List<Message> messages = messageRepository.findByConversationIdOrderByTimestampDesc(conversationId);
-            for (Message message : messages) {
-                if (message.getReceiverId().equals(userId) && message.getStatus() != MessageStatus.READ) {
-                    message.setStatus(MessageStatus.READ);
-                    messageRepository.save(message);
-                }
-            }
+            List<Message> unread = messageRepository.findByConversationIdAndReceiverIdAndStatus(
+                    conversationId, userId, MessageStatus.SENT);
+            unread.forEach(message -> message.setStatus(MessageStatus.READ));
+            if (!unread.isEmpty()) messageRepository.saveAll(unread);
         }
     }
 
     public String decryptMessageContent(String encryptedContent) {
-        log.info("encrypted to decr: {}", encryptedContent);
         return encryptionService.decrypt(encryptedContent);
     }
 }

@@ -35,10 +35,11 @@ public class ParcelMapper {
     public static UserParcelDto parcelRequestToUserParcelDto(ParcelRequest parcelRequest) {
         return UserParcelDto.builder()
                 .title(parcelRequest.getTitle())
+                .price(parcelRequest.getPrice())
                 .origin(parcelRequest.getPickupAddress())
                 .destination(parcelRequest.getDeliveryAddress())
-                .arrivalDate(parcelRequest.getPickupDate())
-                .departureDate(parcelRequest.getDeliveryDate())
+                .arrivalDate(parcelRequest.getDeliveryDate())
+                .departureDate(parcelRequest.getPickupDate())
                 .createdAt(parcelRequest.getCreatedAt())
                 .realizedAt(parcelRequest.getRealizedAt())
                 .status(parcelRequest.isRealized())

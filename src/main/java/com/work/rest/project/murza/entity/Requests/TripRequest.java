@@ -22,6 +22,9 @@ public class TripRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTrip;
 
+    @Column(length = 120)
+    private String title;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @NotNull(message = "Driver cannot be null")
@@ -85,6 +88,7 @@ public class TripRequest {
     private List<ItemsDelivery> declinedItems;
 
     @NotBlank(message = "Description is mandatory")
+    @Column(length = 3000)
     private String description;
 
     @ManyToOne

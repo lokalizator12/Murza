@@ -1,6 +1,8 @@
 package com.work.rest.project.murza.repository;
 
 import com.work.rest.project.murza.entity.Message;
+import com.work.rest.project.murza.entity.MessageStatus;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -19,6 +21,12 @@ public interface MessageRepository extends MongoRepository<Message, String> {
     @Query("SELECT m FROM Message m WHERE m.sender.id = :interlocutorId AND m.receiver.id = :currentUserId AND m.status = 'SENT'")
     List<Message> findUnreadMessages(@Param("currentUserId") Long currentUserId, @Param("interlocutorId") Long interlocutorId);
 */
+    Optional<Message> findFirstByConversationIdOrderByTimestampDesc(String conversationId);
+
+    long countByConversationIdAndReceiverIdAndStatus(String conversationId, Long receiverId, MessageStatus status);
+
+    List<Message> findByConversationIdAndReceiverIdAndStatus(String conversationId, Long receiverId, MessageStatus status);
+
     List<Message> findByConversationIdOrderByTimestampDesc(String conversationId);
 
     Page<Message> findByConversationIdOrderByTimestampDesc(String conversationId, Pageable pageable);

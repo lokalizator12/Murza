@@ -1,27 +1,21 @@
 package com.work.rest.project.murza.dto.profile;
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.Builder;
-import lombok.Data;
-
-
+import jakarta.validation.constraints.*;
+import lombok.*;
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserSettingsUpdateDto {
-    @Email
+    @Email @Size(max = 254) @Pattern(regexp = ".*\\S.*", message = "Email must not be blank")
     private String email;
-
-    @Pattern(regexp = "\\+?[0-9]{10,15}", message = "Invalid phone number format")
+    @Pattern(regexp = "\\+?[0-9]{10,15}", message = "Use an international phone number with 10–15 digits")
     private String phoneNumber;
-
-    @NotBlank(message = "Current password is required for any changes.")
+    @NotBlank(message = "Enter your current password to confirm changes")
     private String currentPassword;
-
-    @Size(min = 6, message = "New password must be at least 6 characters long")
+    @Size(min = 8, max = 72, message = "New password must contain 8–72 characters")
     private String newPassword;
-
-    private boolean verificationStatus;
+    @AssertTrue(message = "New password must not exceed 72 UTF-8 bytes")
+    public boolean isPasswordWithinByteLimit() {
+        return newPassword == null || newPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= 72;
+    }
 }

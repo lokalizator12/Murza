@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface VerificationCodeRepository extends JpaRepository<VerificationCode, Long> {
+    void deleteByUserAndType(com.work.rest.project.murza.entity.User user, String type);
 
 
     @Query(value = "SELECT * FROM verification_codes vc " +
@@ -21,7 +22,7 @@ public interface VerificationCodeRepository extends JpaRepository<VerificationCo
             "AND vc.verified = false " +
             "AND vc.expiration_time >= NOW() - INTERVAL 2 MINUTE " +
             "ORDER BY vc.expiration_time DESC " +
-            "LIMIT 1", nativeQuery = true)
+            "LIMIT 1 FOR UPDATE", nativeQuery = true)
     Optional<VerificationCode> findLatestUnverifiedCodeWithinTimeframeNative(
             @Param("userId") Long userId,
             @Param("type") String type);
