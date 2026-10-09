@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.List;
 
 public interface FileService {
+    void deleteStoredPhotos(List<String> urls, String prefix);
+
     List<String> saveFiles(List<MultipartFile> files, String prefix, String entityId) throws IOException;
 
     String saveProfilePicture(MultipartFile file, Long userId) throws IOException;

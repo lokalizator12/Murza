@@ -25,6 +25,7 @@ public class VerificationServiceImpl implements VerificationService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final SmsService smsService;
+    private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
 
     @Value("${verification-status.expiration-code}")
     private int CODE_EXPIRATION_MINUTES;
@@ -37,7 +38,9 @@ public class VerificationServiceImpl implements VerificationService {
     private String frontendBaseUrl;
 
     @Override
+    @Transactional
     public void sendVerificationCode(Long userId, String type) {
+        requireContactType(type);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId.toString()));
 
@@ -56,8 +59,8 @@ public class VerificationServiceImpl implements VerificationService {
         }
 
         Optional<VerificationCode> existingCode = codeRepository.findActiveCode(userId, type);
-        if (existingCode.isPresent() && existingCode.get().getExpirationTime().after(new Date())) {
-            throw new VerificationCodeAlreadyActiveException(existingCode.toString());
+        if (existingCode.isPresent() && existingCode.get().getCode().matches("[0-9]{6}") && existingCode.get().getExpirationTime().after(new Date())) {
+            throw new VerificationCodeAlreadyActiveException("A code has already been sent. Check your inbox or SMS");
         }
 
         Date tenMinutesAgo = new Date(System.currentTimeMillis() - 10 * 60 * 1000);
@@ -78,7 +81,7 @@ public class VerificationServiceImpl implements VerificationService {
 
     @Override
     public VerificationCode generateVerificationCode(User user, String type) {
-        String code = String.valueOf((int) (Math.random() * 900000) + 100000);
+        String code = String.valueOf(RANDOM.nextInt(900000) + 100000);
         return VerificationCode.builder()
                 .code(code)
                 .expirationTime(new Date(System.currentTimeMillis() + (long) CODE_EXPIRATION_MINUTES * 60 * 1000))
@@ -129,12 +132,17 @@ public class VerificationServiceImpl implements VerificationService {
 
 
     @Override
+    @Transactional(noRollbackFor = {VerificationCodeNotFoundException.class, VerificationBlockedException.class})
     public void verifyCode(Long userId, String code, String type) {
+        requireContactType(type);
         VerificationCode verificationCode = codeRepository.findLatestUnverifiedCodeWithinTimeframeNative(userId, type)
                 .orElseThrow(() -> new VerificationCodeNotFoundException("No valid code found"));
 
+        if (verificationCode.getBlockedUntil() != null && verificationCode.getBlockedUntil().after(new Date())) {
+            throw new VerificationBlockedException("Verification is temporarily blocked");
+        }
         if (verificationCode.getExpirationTime().before(new Date())) {
-            throw new VerificationCodeExpiredException(code);
+            throw new VerificationCodeExpiredException("The verification code has expired");
         }
 
         if (!verificationCode.getCode().equals(code)) {
@@ -164,6 +172,11 @@ public class VerificationServiceImpl implements VerificationService {
         }
 
         userRepository.save(user);
+    }
+
+    private void requireContactType(String type) {
+        if (!"email".equals(type) && !"phone".equals(type)) throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.BAD_REQUEST, "Choose email or phone verification");
     }
 
     @Override

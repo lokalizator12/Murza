@@ -21,6 +21,7 @@ import java.util.Set;
 public class ChatChannelInterceptor implements ChannelInterceptor {
     private final JwtService jwt;
     private final BlacklistJwtService blacklist;
+    private final com.work.rest.project.murza.repository.UserRepository users;
     private static final Set<String> SEND_DESTINATIONS = Set.of(
             "/app/chat.sendMessage", "/app/chat.readReceipt", "/app/presence/online", "/app/presence/offline");
     private static final Set<String> PRIVATE_SUBSCRIPTIONS = Set.of(
@@ -36,7 +37,7 @@ public class ChatChannelInterceptor implements ChannelInterceptor {
             if (session == null || !(session.get("accessToken") instanceof String token) ||
                     !(session.get("authenticatedUser") instanceof User user)) throw denied();
             try {
-                if (blacklist.isTokenBlacklisted(token) || !jwt.isTokenValid(token, user)) throw denied();
+                if (blacklist.isTokenBlacklisted(token) || !jwt.isTokenValid(token, users.findById(user.getId()).orElseThrow(this::denied))) throw denied();
             } catch (RuntimeException exception) {
                 throw denied();
             }

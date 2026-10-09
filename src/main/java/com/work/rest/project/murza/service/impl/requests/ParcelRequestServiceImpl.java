@@ -57,17 +57,8 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
             Double priceMin, Double priceMax,
             String sortBy, String sortDirection
     ) {
-        Sort sort = Sort.by(Sort.Direction.ASC, "pickupDate"); // Сортировка по умолчанию
-        if (sortBy != null && !sortBy.isEmpty() && sortDirection != null && !sortDirection.isEmpty()) {
-            try {
-                Sort.Direction direction = Sort.Direction.fromString(sortDirection);
-                sort = Sort.by(direction, sortBy);
-            } catch (IllegalArgumentException e) {
-                log.warn("Invalid sort direction '{}', defaulting to ASC", sortDirection);
-                sort = Sort.by(Sort.Direction.ASC, sortBy);
-            }
-        }
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Sort sort = com.work.rest.project.murza.service.RequestPagination.sort(sortBy, sortDirection, "pickupDate", java.util.Set.of("pickupDate", "deliveryDate", "price", "createdAt"));
+        Pageable pageable = com.work.rest.project.murza.service.RequestPagination.page(page, size, sort);
 
         Specification<ParcelRequest> spec = Specification.where(ParcelRequestSpecifications.isNotRealized());
 
@@ -125,17 +116,20 @@ public class ParcelRequestServiceImpl implements ParcelRequestService {
     public Page<UserParcelDto> findBySender(Long id, int page, int size) {
         User sender = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id.toString()));
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = com.work.rest.project.murza.service.RequestPagination.page(page, size, Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by("idParcel")));
         return parcelRequestRepository
                 .findAllBySender(sender, pageable)
                 .map(ParcelMapper::parcelRequestToUserParcelDto);
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteParcelRequest(UUID id) {
         ParcelRequest request = getParcelRequestById(id);
         requireOwner(request);
+        List<String> photos = request.getPhotos() == null ? List.of() : new java.util.ArrayList<>(request.getPhotos());
         parcelRequestRepository.delete(request);
+        fileService.deleteStoredPhotos(photos, com.work.rest.project.murza.util.constants.S3Constants.PARCEL_REQUESTS_PREFIX + id + "/");
         log.info("Parcel request with ID {} deleted", id);
     }
 

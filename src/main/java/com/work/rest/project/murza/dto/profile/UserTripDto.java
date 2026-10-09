@@ -9,6 +9,7 @@ import java.util.Date;
 @Builder
 public class UserTripDto {
     private Long idTrip;
+    private String title;
     private String origin;
     private Date createdAt;
     private Date realizedAt;

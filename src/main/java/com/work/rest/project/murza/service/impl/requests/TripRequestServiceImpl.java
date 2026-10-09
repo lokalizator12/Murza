@@ -80,7 +80,7 @@ public class TripRequestServiceImpl implements TripRequestService {
 
     @Override
     public Page<UserTripDto> findByDriver(Long userid, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = com.work.rest.project.murza.service.RequestPagination.page(page, size, Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by("idTrip")));
         User driver = userRepository.findById(userid).orElseThrow(() -> new UserNotFoundException(userid.toString()));
         return tripRequestRepository.findAllByDriver(driver, pageable)
                 .map(TripMapper::tripRequestToUserTripDto);
@@ -109,18 +109,8 @@ public class TripRequestServiceImpl implements TripRequestService {
             LocalDate dateFrom, LocalDate dateTo,
             String sortBy, String sortDirection
     ) {
-        Sort sort = Sort.by(Sort.Direction.ASC, "departureDate"); // Сортировка по умолчанию
-        if (sortBy != null && !sortBy.isEmpty() && sortDirection != null && !sortDirection.isEmpty()) {
-            try {
-                Sort.Direction direction = Sort.Direction.fromString(sortDirection);
-                sort = Sort.by(direction, sortBy);
-            } catch (IllegalArgumentException e) {
-                log.warn("Invalid sort direction '{}', defaulting to ASC", sortDirection);
-                sort = Sort.by(Sort.Direction.ASC, sortBy);
-            }
-        }
-
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Sort sort = com.work.rest.project.murza.service.RequestPagination.sort(sortBy, sortDirection, "departureDate", java.util.Set.of("departureDate", "destinationDate", "createdAt"));
+        Pageable pageable = com.work.rest.project.murza.service.RequestPagination.page(page, size, sort);
 
         Specification<TripRequest> spec = Specification.where(TripRequestSpecifications.isNotRealized());
 

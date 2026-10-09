@@ -28,6 +28,7 @@ public class TripMapper {
     public static UserTripDto tripRequestToUserTripDto(TripRequest tripRequest) {
         return UserTripDto.builder()
                 .idTrip(tripRequest.getIdTrip())
+                .title(tripRequest.getTitle())
                 .status(tripRequest.isRealized())
                 .origin(tripRequest.getDepartureAddress())
                 .createdAt(tripRequest.getCreatedAt())

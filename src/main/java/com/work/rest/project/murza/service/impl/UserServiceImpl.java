@@ -37,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final FileService fileService;
     private final AuthenticationService authenticationService;
+    private final com.work.rest.project.murza.repository.VerificationCodeRepository verificationCodes;
 
     @Override
     public List<User> getAllUsers() {
@@ -51,14 +52,20 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException(userId.toString()));
 
         if (!passwordEncoder.matches(settingsDto.getCurrentPassword(), user.getPassword())) {
-            throw new CredentialAlreadyExistsException("Password uncorrected");
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Your current password is incorrect");
         }
 
+        boolean invalidateSessions = false;
+        if (settingsDto.getEmail() != null) settingsDto.setEmail(settingsDto.getEmail().trim());
         if (settingsDto.getEmail() != null && !settingsDto.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(settingsDto.getEmail())) {
                 throw new CredentialAlreadyExistsException("Email already in use: " + settingsDto.getEmail());
             }
             user.setEmail(settingsDto.getEmail());
+            user.setVerificationStatusEmail(false);
+            verificationCodes.deleteByUserAndType(user, "email");
+            verificationCodes.deleteByUserAndType(user, "password-reset");
+            invalidateSessions = true;
         }
 
         if (settingsDto.getPhoneNumber() != null && !settingsDto.getPhoneNumber().equals(user.getPhoneNumber())) {
@@ -66,12 +73,17 @@ public class UserServiceImpl implements UserService {
                 throw new CredentialAlreadyExistsException("Phone number already in use: " + settingsDto.getPhoneNumber());
             }
             user.setPhoneNumber(settingsDto.getPhoneNumber());
+            user.setVerificationStatusPhone(false);
+            verificationCodes.deleteByUserAndType(user, "phone");
         }
 
         if (settingsDto.getNewPassword() != null && !settingsDto.getNewPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(settingsDto.getNewPassword()));
+            verificationCodes.deleteByUserAndType(user, "password-reset");
+            invalidateSessions = true;
         }
 
+        if (invalidateSessions) user.setCredentialsVersion(user.getCredentialsVersion() + 1);
 
         userRepository.save(user);
 
@@ -132,8 +144,10 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id.toString()));
 
-        user.setFirstName(userProfileDto.getFirstName());
-        user.setLastName(userProfileDto.getLastName());
+        String previousPhoto = user.getUserPhoto();
+        user.setFirstName(userProfileDto.getFirstName().trim());
+        user.setLastName(userProfileDto.getLastName().trim());
+        if (userProfileDto.isRemovePhoto()) user.setUserPhoto(null);
 
         // Проверяем, передан ли файл для фотографии
         if (userProfileDto.getUserPhoto() != null && !userProfileDto.getUserPhoto().isEmpty()) {
@@ -145,6 +159,9 @@ public class UserServiceImpl implements UserService {
         }
 
         userRepository.save(user);
+        if (previousPhoto != null && !java.util.Objects.equals(previousPhoto, user.getUserPhoto())) {
+            fileService.deleteStoredPhotos(List.of(previousPhoto), com.work.rest.project.murza.util.constants.S3Constants.PROFILE_PICTURES_PREFIX + id + "/");
+        }
 
         return UserMapper.toUserProfileDto(user);
     }

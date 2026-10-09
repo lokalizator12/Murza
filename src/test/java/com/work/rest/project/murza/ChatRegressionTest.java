@@ -126,7 +126,7 @@ class ChatRegressionTest {
         headers.setSessionAttributes(java.util.Map.of("accessToken", "revoked", "authenticatedUser", user(1L)));
         headers.setLeaveMutable(true);
         var frame = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
-        assertThrows(AccessDeniedException.class, () -> new ChatChannelInterceptor(jwt, blacklist).preSend(frame, null));
+        assertThrows(AccessDeniedException.class, () -> new ChatChannelInterceptor(jwt, blacklist, mock(UserRepository.class)).preSend(frame, null));
         verifyNoInteractions(jwt);
     }
 
@@ -148,7 +148,9 @@ class ChatRegressionTest {
         headers.setSessionAttributes(java.util.Map.of("accessToken", "valid", "authenticatedUser", member));
         when(jwt.isTokenValid("valid", member)).thenReturn(true);
         headers.setLeaveMutable(true);
-        new ChatChannelInterceptor(jwt, blacklist).preSend(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()), null);
+        var users = mock(UserRepository.class);
+        when(users.findById(1L)).thenReturn(Optional.of(member));
+        new ChatChannelInterceptor(jwt, blacklist, users).preSend(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()), null);
     }
 
     private User user(Long id) { User user = new User(); user.setId(id); return user; }

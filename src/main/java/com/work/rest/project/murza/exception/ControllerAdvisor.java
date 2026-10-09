@@ -150,6 +150,11 @@ public class ControllerAdvisor {
         return buildErrorResponse(HttpStatus.FORBIDDEN, "Verification code expiration error", List.of(errorDetail));
     }
 
+    @ExceptionHandler(CredentialAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleCredentialConflict(CredentialAlreadyExistsException ex) {
+        return buildErrorResponse(HttpStatus.CONFLICT, "This email or phone number is already used by another account", List.of());
+    }
+
     @ExceptionHandler(SubscribeException.class)
     public ResponseEntity<ApiErrorResponse> handleSubscribeException(SubscribeException ex) {
         log.warn(ex.getMessage());

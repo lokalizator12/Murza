@@ -61,12 +61,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Optional<User> existingUserByEmail = userRepository.findByEmail(userDto.getEmail());
         if (existingUserByEmail.isPresent()) {
             log.error("Email is already registered: {}", userDto.getEmail());
-            throw new IllegalArgumentException("Email is already registered");
+            throw new com.work.rest.project.murza.exception.CredentialAlreadyExistsException("Email is already registered");
         }
         Optional<User> existingUserByPhoneNumber = userRepository.findByPhoneNumber(userDto.getPhoneNumber());
         if (existingUserByPhoneNumber.isPresent()) {
             log.error("Phone number is already registered: {}", userDto.getPhoneNumber());
-            throw new IllegalArgumentException("Phone number is already registered");
+            throw new com.work.rest.project.murza.exception.CredentialAlreadyExistsException("Phone number is already registered");
         }
         User user = new User();
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
@@ -153,25 +153,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticateResponseDto refreshJwt(HttpServletRequest request, HttpServletResponse response) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("refresh-token".equals(cookie.getName())) {
-                    String refreshToken = cookie.getValue();
-                    String username = jwtService.extractUsername(refreshToken);
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        try {
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("refresh-token".equals(cookie.getName())) {
+                        String refreshToken = cookie.getValue();
+                        String username = jwtService.extractUsername(refreshToken);
+                        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                    if (jwtService.isRefreshTokenValid(refreshToken, userDetails)) {
-                        String newAccessToken = jwtService.generateToken(userDetails);
-                        return
-                                AuthenticateResponseDto.builder()
-                                        .token(newAccessToken)
-                                        .expiresIn(jwtService.getJwtExpirationInMs())
-                                        .build();
+                        if (jwtService.isRefreshTokenValid(refreshToken, userDetails)) {
+                            String newAccessToken = jwtService.generateToken(userDetails);
+                            return
+                                    AuthenticateResponseDto.builder()
+                                            .token(newAccessToken)
+                                            .expiresIn(jwtService.getJwtExpirationInMs())
+                                            .build();
 
+                        }
                     }
                 }
             }
+        } catch (io.jsonwebtoken.JwtException | org.springframework.security.core.userdetails.UsernameNotFoundException | IllegalArgumentException exception) {
+            return null;
         }
         return null;
     }
@@ -203,6 +207,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = token.getUser();
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setCredentialsVersion(user.getCredentialsVersion() + 1);
         userRepository.save(user);
         token.setVerified(true);
         verificationCodeRepository.save(token);

@@ -25,7 +25,6 @@ The backend adds missing standard shipping methods at startup. It preserves exis
 
 WebSocket clients can subscribe only to their own message/read-receipt queues and public presence topics. They can publish only to explicit application actions. Expiration and revocation are checked again on CONNECT, SEND and SUBSCRIBE. The inbox loads the last message and an unread count instead of materializing every conversation's history; read receipts update only incoming unread messages.
 
-The frontend's `PROJECT_PROGRESS.md` records completed development batches and the next product work.
 
 ## Remaining work
 

@@ -12,6 +12,7 @@ import java.util.UUID;
 public class UserParcelDto {
     private UUID idParcel;
     private String title;
+    private double price;
     private String origin;
     private String destination;
     private Date departureDate;

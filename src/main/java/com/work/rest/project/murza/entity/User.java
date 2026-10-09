@@ -67,6 +67,10 @@ public class User implements UserDetails {
     private boolean online;
 
     private Date lastSeen;
+
+    @JsonIgnore
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private int credentialsVersion = 0;
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;

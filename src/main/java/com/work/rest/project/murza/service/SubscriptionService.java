@@ -10,6 +10,8 @@ public interface SubscriptionService {
 
     void unsubscribe(Long followerId, Long followedId);
 
+    void removeFollower(Long followedId, Long followerId);
+
     List<UserSubscribeDto> getFollowers(Long userId);
 
     List<UserSubscribeDto> getFollowing(Long userId);
